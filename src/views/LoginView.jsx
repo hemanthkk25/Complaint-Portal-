@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Zap, Lock, Mail, ArrowRight } from 'lucide-react';
 
 export function LoginView({ onLoginSuccess }) {
   const { loginUser } = useApp();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('alex.johnson@user.portal.edu');
   const [password, setPassword] = useState('password123');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const redirectUser = (user) => {
+    if (user.role === 'user') {
+      navigate('/user');
+    } else if (user.role === 'staff') {
+      navigate('/staff');
+    } else if (user.role === 'supervisor') {
+      navigate('/supervisor');
+    } else if (user.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -151,29 +167,38 @@ export function LoginView({ onLoginSuccess }) {
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('marcus.vance@staff.portal.edu')}
+                onClick={() => handleQuickDemoClick('marcus.vance@technician.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">marcus.vance@staff.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Marcus Vance (Staff)</div>
+                <div className="font-bold text-slate-900 truncate">marcus.vance@technician.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Marcus Vance (Technician)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('robert.sterling@admin.portal.edu')}
+                onClick={() => handleQuickDemoClick('robert.sterling@supervisor.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">robert.sterling@admin.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Robert Sterling (Admin)</div>
+                <div className="font-bold text-slate-900 truncate">robert.sterling@supervisor.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Robert Sterling (Electrical Supervisor)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('dr.evelyn@superadmin.portal.edu')}
+                onClick={() => handleQuickDemoClick('sarah.jenkins@supervisor.portal.edu')}
+                className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-left font-medium transition"
+              >
+                <div className="font-bold text-slate-900 truncate">sarah.jenkins@supervisor.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Sarah Jenkins (Plumbing Supervisor)</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDemoClick('dr.evelyn@admin.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">dr.evelyn@superadmin.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Dr. Evelyn (Super Admin)</div>
+                <div className="font-bold text-slate-900 truncate">dr.evelyn@admin.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Dr. Evelyn Vance (Admin)</div>
               </button>
             </div>
           </div>

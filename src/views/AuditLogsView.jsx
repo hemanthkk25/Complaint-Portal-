@@ -3,10 +3,32 @@ import { useApp } from '../context/AppContext';
 import { ShieldAlert, Search, Terminal } from 'lucide-react';
 
 export function AuditLogsView() {
-  const { auditLogs } = useApp();
+  const { auditLogs, currentUser, users } = useApp();
   const [search, setSearch] = useState('');
 
+  const isSupervisor = currentUser.role === 'supervisor';
+  const supervisorCategory = isSupervisor ? (currentUser.assignedCategory || 'Electrical') : null;
+
+  // Filter technician IDs belonging to supervisor category
+  const supervisorTechNames = users
+    .filter(u => u.role === 'technician' && (
+      u.departmentName?.toLowerCase().includes(supervisorCategory?.toLowerCase()) ||
+      u.department?.toLowerCase().includes(supervisorCategory?.toLowerCase())
+    ))
+    .map(u => u.name.toLowerCase());
+
   let filteredLogs = [...auditLogs];
+
+  if (isSupervisor) {
+    filteredLogs = filteredLogs.filter(l =>
+      l.details.toLowerCase().includes(supervisorCategory.toLowerCase()) ||
+      supervisorTechNames.some(techName => l.userName.toLowerCase().includes(techName) || l.details.toLowerCase().includes(techName)) ||
+      l.action.toLowerCase().includes('staff') ||
+      l.action.toLowerCase().includes('status') ||
+      l.action.toLowerCase().includes('preset')
+    );
+  }
+
   if (search) {
     const q = search.toLowerCase();
     filteredLogs = filteredLogs.filter(l =>
@@ -24,9 +46,13 @@ export function AuditLogsView() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <ShieldAlert className="w-6 h-6 text-rose-600" />
-            Module 14: Security Audit & Traceability Logs
+            {isSupervisor ? `${supervisorCategory} Department Security & Action Logs` : 'Security Audit & Traceability Logs'}
           </h2>
-          <p className="text-xs text-slate-500">Immutable chronological record of logins, priority overrides, reassignments, and user modifications</p>
+          <p className="text-xs text-slate-500">
+            {isSupervisor
+              ? `Chronological audit stream of technician dispatches, ticket updates, and actions for ${supervisorCategory}`
+              : 'Immutable chronological record of logins, priority overrides, reassignments, and user modifications'}
+          </p>
         </div>
       </div>
 

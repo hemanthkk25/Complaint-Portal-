@@ -4,6 +4,7 @@ import {
   INITIAL_USERS,
   INITIAL_DEPARTMENTS,
   INITIAL_CATEGORIES,
+  INITIAL_PREDEFINED_ISSUES,
   INITIAL_LOCATIONS,
   INITIAL_STATUS_HISTORY,
   INITIAL_NOTIFICATIONS,
@@ -19,23 +20,48 @@ const AppContext = createContext();
 
 export function AppProvider({ children }) {
   // LocalStorage Persistence Keys
-  const STORAGE_KEY = 'COMPLAINT_PORTAL_STATE_V3';
+  const STORAGE_KEY = 'COMPLAINT_PORTAL_STATE_V7';
 
   // State initialization
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_USERS`);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migrate any legacy email formats
+      // Migrate legacy emails and roles
       return parsed.map(u => {
-        if (u.email === 'staff.elec@portal.edu' || u.id === 'stf-1') {
-          return { ...u, email: 'marcus.vance@staff.portal.edu', name: 'Marcus Vance' };
+        if (u.id === 'adm-1' || u.email.includes('robert.sterling')) {
+          return {
+            ...u,
+            email: 'robert.sterling@supervisor.portal.edu',
+            role: 'supervisor',
+            name: 'Robert Sterling',
+            assignedCategory: u.assignedCategory || 'Electrical',
+            department: 'Electrical Engineering',
+            departmentName: 'Electrical Engineering'
+          };
         }
-        if (u.email === 'staff.plumb@portal.edu' || u.id === 'stf-2') {
-          return { ...u, email: 'david.miller@staff.portal.edu', name: 'David Miller' };
+        if (u.id === 'adm-2' || u.email.includes('sarah.jenkins')) {
+          return {
+            ...u,
+            email: 'sarah.jenkins@supervisor.portal.edu',
+            role: 'supervisor',
+            name: 'Sarah Jenkins',
+            assignedCategory: u.assignedCategory || 'Plumbing',
+            department: 'Plumbing & Water Services',
+            departmentName: 'Plumbing & Water Services'
+          };
         }
-        if (u.email === 'staff.it@portal.edu' || u.id === 'stf-3') {
-          return { ...u, email: 'elena.rostova@staff.portal.edu', name: 'Elena Rostova' };
+        if (u.id === 'sup-1' || u.email.includes('chiefhead') || u.role === 'chief_head') {
+          return { ...u, email: 'dr.evelyn@admin.portal.edu', role: 'admin', name: 'Dr. Evelyn Vance', department: 'System Administration' };
+        }
+        if (u.id === 'stf-1' || u.role === 'staff') {
+          return { ...u, email: 'marcus.vance@technician.portal.edu', role: 'technician', name: 'Marcus Vance' };
+        }
+        if (u.id === 'stf-2') {
+          return { ...u, email: 'david.miller@technician.portal.edu', role: 'technician', name: 'David Miller' };
+        }
+        if (u.id === 'stf-3') {
+          return { ...u, email: 'elena.rostova@technician.portal.edu', role: 'technician', name: 'Elena Rostova' };
         }
         return u;
       });
@@ -55,6 +81,11 @@ export function AppProvider({ children }) {
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_CATEGORIES`);
     return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+  });
+
+  const [predefinedIssues, setPredefinedIssues] = useState(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_PREDEFINED_ISSUES`);
+    return saved ? JSON.parse(saved) : INITIAL_PREDEFINED_ISSUES;
   });
 
   const [departments, setDepartments] = useState(() => {
@@ -160,15 +191,15 @@ export function AppProvider({ children }) {
     // Auto-detect role from institutional email domain patterns
     let detectedRole = 'user';
     let deptName = 'General Academic';
-    if (cleanEmail.includes('staff') || cleanEmail.endsWith('@staff.com')) {
-      detectedRole = 'staff';
+    if (cleanEmail.includes('technician') || cleanEmail.includes('tech') || cleanEmail.includes('staff')) {
+      detectedRole = 'technician';
       deptName = 'Electrical Engineering';
-    } else if (cleanEmail.includes('superadmin') || cleanEmail.endsWith('@superadmin.com')) {
-      detectedRole = 'superadmin';
-      deptName = 'System Oversight';
-    } else if (cleanEmail.includes('admin') || cleanEmail.endsWith('@admin.com')) {
+    } else if (cleanEmail.includes('supervisor') || cleanEmail.includes('cathead')) {
+      detectedRole = 'supervisor';
+      deptName = 'Facilities Supervision';
+    } else if (cleanEmail.includes('admin') || cleanEmail.includes('superadmin')) {
       detectedRole = 'admin';
-      deptName = 'Facilities Management';
+      deptName = 'System Administration';
     }
 
     const autoCreatedUser = {
@@ -372,8 +403,26 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Module 4: Manual Admin Reassignment Override
+  // Module 4: Manual Staff Reassignment & Dispatch
   const reassignStaffManually = (complaintId, newStaffId) => {
+    if (!newStaffId) {
+      setComplaints(prev => prev.map(c => {
+        if (c.id === complaintId) {
+          const prevStaff = c.assignedTo?.name || 'Unassigned';
+          const updated = {
+            ...c,
+            assignedTo: null,
+            status: c.status === 'in_progress' ? 'submitted' : c.status,
+            updatedAt: new Date().toISOString(),
+          };
+          logAuditEvent('STAFF_UNASSIGNMENT', `Unassigned ticket #${c.ticketId} from ${prevStaff}`, 'Complaint', complaintId);
+          return updated;
+        }
+        return c;
+      }));
+      return;
+    }
+
     const staffMember = users.find(u => u.id === newStaffId);
     if (!staffMember) return;
 
@@ -382,10 +431,12 @@ export function AppProvider({ children }) {
         const prevStaff = c.assignedTo?.name || 'Unassigned';
         const updated = {
           ...c,
-          status: c.status === 'submitted' ? 'assigned' : c.status,
+          status: c.status === 'submitted' ? 'in_progress' : c.status,
           assignedTo: {
             id: staffMember.id,
             name: staffMember.name,
+            email: staffMember.email,
+            avatar: staffMember.avatar,
             department: staffMember.departmentName || staffMember.department || 'Maintenance',
           },
           updatedAt: new Date().toISOString(),
@@ -396,16 +447,16 @@ export function AppProvider({ children }) {
           complaintId,
           oldStatus: c.status,
           newStatus: updated.status,
-          changedBy: `${currentUser.name} (Admin Override)`,
+          changedBy: `${currentUser.name} (${currentUser.role})`,
           timestamp: new Date().toISOString(),
-          notes: `Admin manually reassigned ticket from ${prevStaff} to ${staffMember.name}`,
+          notes: `Reassigned ticket from ${prevStaff} to ${staffMember.name}`,
         };
         setStatusHistory(h => [historyItem, ...h]);
 
         sendNotification(
           staffMember.id,
-          'Work Order Reassigned',
-          `Ticket #${c.ticketId} has been manually assigned to you by Admin.`,
+          'Work Order Assigned',
+          `Ticket #${c.ticketId} has been assigned to you.`,
           'assignment',
           complaintId,
           c.ticketId
@@ -413,7 +464,7 @@ export function AppProvider({ children }) {
 
         logAuditEvent(
           'MANUAL_STAFF_REASSIGNMENT',
-          `Reassigned ticket #${c.ticketId} to ${staffMember.name}`,
+          `Reassigned ticket #${c.ticketId} from ${prevStaff} to ${staffMember.name}`,
           'Complaint',
           complaintId
         );
@@ -468,7 +519,7 @@ export function AppProvider({ children }) {
       departmentId: userData.departmentId,
       departmentName: userData.departmentName,
       phone: userData.phone || '+1 (555) 000-1111',
-      avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80`,
+      avatar: DEFAULT_USER_AVATAR,
       createdAt: new Date().toISOString(),
     };
     setUsers(prev => [...prev, newUser]);
@@ -485,11 +536,93 @@ export function AppProvider({ children }) {
     return detectDuplicates(draftComplaint, complaints);
   };
 
+  const addPredefinedIssue = (categoryName, issueText) => {
+    if (!categoryName || !issueText) return;
+    setPredefinedIssues(prev => {
+      const currentList = prev[categoryName] || [];
+      if (currentList.includes(issueText)) return prev;
+      return {
+        ...prev,
+        [categoryName]: [...currentList, issueText]
+      };
+    });
+    logAuditEvent('SUPERVISOR_ADD_PRESET_ISSUE', `Added predefined issue template to category '${categoryName}': ${issueText}`, 'Category', categoryName);
+  };
+
+  const removePredefinedIssue = (categoryName, issueText) => {
+    setPredefinedIssues(prev => {
+      const currentList = prev[categoryName] || [];
+      return {
+        ...prev,
+        [categoryName]: currentList.filter(item => item !== issueText)
+      };
+    });
+    logAuditEvent('SUPERVISOR_REMOVE_PRESET_ISSUE', `Removed issue template from category '${categoryName}': ${issueText}`, 'Category', categoryName);
+  };
+
+  const addCategory = (categoryName, description) => {
+    if (!categoryName || !categoryName.trim()) return;
+    const trimmed = categoryName.trim();
+    const catId = `cat-${Date.now()}`;
+    const deptId = `dept-${Date.now()}`;
+
+    const newCategory = {
+      id: catId,
+      name: trimmed,
+      description: description || `${trimmed} Maintenance & Workorder Management`,
+      departmentId: deptId,
+    };
+
+    const newDepartment = {
+      id: deptId,
+      name: `${trimmed} Department`,
+      code: trimmed.substring(0, 3).toUpperCase(),
+    };
+
+    setCategories(prev => {
+      if (prev.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) return prev;
+      return [...prev, newCategory];
+    });
+
+    setDepartments(prev => {
+      if (prev.some(d => d.name.toLowerCase() === `${trimmed} Department`.toLowerCase())) return prev;
+      return [...prev, newDepartment];
+    });
+
+    setPredefinedIssues(prev => {
+      if (prev[trimmed]) return prev;
+      return {
+        ...prev,
+        [trimmed]: [`Standard ${trimmed} Issue Inspection`, `Routine ${trimmed} Repair`]
+      };
+    });
+
+    logAuditEvent('ADMIN_ADD_CATEGORY_DEPARTMENT', `Created new Category/Department '${trimmed}'`, 'Category', catId);
+  };
+
+  const assignSupervisorToCategory = (supervisorUserId, categoryName) => {
+    const matchedCategory = categories.find(c => c.name === categoryName);
+    setUsers(prev => prev.map(u => {
+      if (u.id === supervisorUserId) {
+        return {
+          ...u,
+          assignedCategory: categoryName,
+          department: `${categoryName} Department`,
+          departmentName: `${categoryName} Department`,
+          departmentId: matchedCategory?.departmentId || u.departmentId,
+        };
+      }
+      return u;
+    }));
+    logAuditEvent('ADMIN_ASSIGN_SUPERVISOR_CATEGORY', `Assigned Supervisor ID ${supervisorUserId} to Category '${categoryName}'`, 'User', supervisorUserId);
+  };
+
   const value = {
     currentUser,
     users,
     complaints,
     categories,
+    predefinedIssues,
     departments,
     statusHistory,
     notifications,
@@ -500,6 +633,7 @@ export function AppProvider({ children }) {
     createComplaint,
     updateComplaintStatus,
     reassignStaffManually,
+    assignComplaintToStaff: reassignStaffManually,
     submitFeedback,
     markNotificationRead,
     markAllNotificationsRead,
@@ -507,6 +641,10 @@ export function AppProvider({ children }) {
     toggleUserStatus,
     checkDuplicateComplaints,
     setCategories,
+    addPredefinedIssue,
+    removePredefinedIssue,
+    addCategory,
+    assignSupervisorToCategory,
     logAuditEvent,
   };
 

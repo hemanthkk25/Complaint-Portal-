@@ -1,119 +1,240 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { CreateComplaintModal } from './components/CreateComplaintModal';
 import { ComplaintDetailModal } from './components/ComplaintDetailModal';
 
 import { LoginView } from './views/LoginView';
 import { UserDashboard } from './views/UserDashboard';
-import { StaffDashboard } from './views/StaffDashboard';
+import { TechnicianDashboard } from './views/TechnicianDashboard';
+import { SupervisorDashboard } from './views/SupervisorDashboard';
 import { AdminDashboard } from './views/AdminDashboard';
 import { AnalyticsView } from './views/AnalyticsView';
 import { UserManagementView } from './views/UserManagementView';
 import { AuditLogsView } from './views/AuditLogsView';
-import { SuperAdminConfigView } from './views/SuperAdminConfigView';
+import { IssuePresetsView } from './views/IssuePresetsView';
+import { CategoryManagerView } from './views/CategoryManagerView';
 
 function MainApp() {
   const { currentUser } = useApp();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('my_complaints');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    if (currentUser.role === 'user') {
-      setActiveTab('my_complaints');
-    } else if (currentUser.role === 'staff') {
-      setActiveTab('staff_queue');
-    } else if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
-      setActiveTab('admin_master');
-    }
-  }, [currentUser.role]);
+  const getRoleDefaultPath = (role) => {
+    if (role === 'user') return '/user';
+    if (role === 'technician') return '/technician';
+    if (role === 'supervisor') return '/supervisor';
+    if (role === 'admin') return '/admin';
+    return '/login';
+  };
 
-  if (!isAuthenticated) {
-    return (
-      <LoginView
-        onLoginSuccess={() => {
-          setIsAuthenticated(true);
-        }}
-      />
-    );
-  }
-
-  // Sidebar is only shown for Admin & Super Admin roles
-  const showSidebar = currentUser.role === 'admin' || currentUser.role === 'superadmin';
+  const handleLoginSuccess = (user) => {
+    setIsAuthenticated(true);
+    const path = getRoleDefaultPath(user?.role || currentUser.role);
+    navigate(path);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
-      {/* Top Header Navbar */}
-      <Navbar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onLogout={() => setIsAuthenticated(false)}
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to={getRoleDefaultPath(currentUser.role)} replace />
+          ) : (
+            <LoginView onLoginSuccess={handleLoginSuccess} />
+          )
+        }
       />
 
-      {/* Main Content Body */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
-        {/* Render Sidebar ONLY for Admin & Super Admin */}
-        {showSidebar && (
-          <Sidebar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            onOpenCreateModal={() => setIsCreateModalOpen(true)}
-          />
-        )}
+      <Route
+        path="/*"
+        element={
+          !isAuthenticated ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <div className="min-h-screen bg-slate-100 text-slate-900 flex font-sans">
+              {/* Full-Height Vertical Side Navigation Bar (Only for Supervisor & Admin) */}
+              {(currentUser.role === 'supervisor' || currentUser.role === 'admin') && (
+                <Sidebar
+                  onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                  onLogout={() => setIsAuthenticated(false)}
+                />
+              )}
 
-        {/* Dynamic View Area: Occupies full 100% width for User and Staff roles */}
-        <main className="flex-1 min-w-0">
-          {currentUser.role === 'user' && (
-            <UserDashboard
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
-              onSelectComplaint={(c) => setSelectedComplaint(c)}
-              searchQuery={searchQuery}
-            />
-          )}
+              {/* Right Content Panel */}
+              <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+                {/* Top Header Navbar */}
+                <Navbar
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  onLogout={() => setIsAuthenticated(false)}
+                />
 
-          {currentUser.role === 'staff' && (
-            <StaffDashboard
-              onSelectComplaint={(c) => setSelectedComplaint(c)}
-              searchQuery={searchQuery}
-            />
-          )}
+                {/* Dynamic Route View Area */}
+                <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <Routes>
+                    <Route
+                      path="/user"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['user']}>
+                          <UserDashboard
+                            onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                            onSelectComplaint={(c) => setSelectedComplaint(c)}
+                            searchQuery={searchQuery}
+                          />
+                        </ProtectedRoute>
+                      }
+                    />
 
-          {showSidebar && activeTab === 'admin_master' && (
-            <AdminDashboard
-              onSelectComplaint={(c) => setSelectedComplaint(c)}
-              searchQuery={searchQuery}
-            />
-          )}
+                    <Route
+                      path="/technician"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['technician']}>
+                          <TechnicianDashboard
+                            onSelectComplaint={(c) => setSelectedComplaint(c)}
+                            searchQuery={searchQuery}
+                          />
+                        </ProtectedRoute>
+                      }
+                    />
 
-          {showSidebar && activeTab === 'analytics' && <AnalyticsView />}
+                    {/* Supervisor Routes */}
+                    <Route
+                      path="/supervisor"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['supervisor', 'admin']}>
+                          <SupervisorDashboard
+                            onSelectComplaint={(c) => setSelectedComplaint(c)}
+                            searchQuery={searchQuery}
+                          />
+                        </ProtectedRoute>
+                      }
+                    />
 
-          {showSidebar && activeTab === 'user_mgmt' && <UserManagementView />}
+                    <Route
+                      path="/supervisor/analytics"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['supervisor', 'admin']}>
+                          <AnalyticsView />
+                        </ProtectedRoute>
+                      }
+                    />
 
-          {showSidebar && activeTab === 'audit_logs' && <AuditLogsView />}
+                    <Route
+                      path="/supervisor/issue-presets"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['supervisor', 'admin']}>
+                          <IssuePresetsView />
+                        </ProtectedRoute>
+                      }
+                    />
 
-          {currentUser.role === 'superadmin' && activeTab === 'super_config' && (
-            <SuperAdminConfigView />
-          )}
-        </main>
-      </div>
+                    <Route
+                      path="/supervisor/users"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['supervisor', 'admin']}>
+                          <UserManagementView />
+                        </ProtectedRoute>
+                      }
+                    />
 
-      {/* Modals */}
-      <CreateComplaintModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+                    <Route
+                      path="/supervisor/audit-logs"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['supervisor', 'admin']}>
+                          <AuditLogsView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Admin Routes */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <AdminDashboard
+                            onSelectComplaint={(c) => setSelectedComplaint(c)}
+                            searchQuery={searchQuery}
+                          />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin/analytics"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <AnalyticsView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin/issue-presets"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <IssuePresetsView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin/users"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <UserManagementView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin/audit-logs"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <AuditLogsView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/admin/categories"
+                      element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={['admin']}>
+                          <CategoryManagerView />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route path="*" element={<Navigate to={getRoleDefaultPath(currentUser.role)} replace />} />
+                  </Routes>
+                </main>
+              </div>
+
+              {/* Modals */}
+              <CreateComplaintModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+              />
+
+              <ComplaintDetailModal
+                complaint={selectedComplaint}
+                isOpen={!!selectedComplaint}
+                onClose={() => setSelectedComplaint(null)}
+              />
+            </div>
+          )
+        }
       />
-
-      <ComplaintDetailModal
-        complaint={selectedComplaint}
-        isOpen={!!selectedComplaint}
-        onClose={() => setSelectedComplaint(null)}
-      />
-    </div>
+    </Routes>
   );
 }
 

@@ -5,11 +5,12 @@ import { calculatePriority } from '../utils/ruleEngine';
 import { X, Upload, Copy, Sparkles, ShieldAlert } from 'lucide-react';
 
 export function CreateComplaintModal({ isOpen, onClose }) {
-  const { categories, createComplaint, checkDuplicateComplaints } = useApp();
+  const { categories, predefinedIssues, createComplaint, checkDuplicateComplaints } = useApp();
 
+  const [category, setCategory] = useState(categories[0]?.name || 'Electrical');
+  const [selectedIssuePreset, setSelectedIssuePreset] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(categories[0]?.name || 'Electrical');
   const [block, setBlock] = useState(INITIAL_LOCATIONS[0].block);
   const [floor, setFloor] = useState(INITIAL_LOCATIONS[0].floor);
   const [room, setRoom] = useState(INITIAL_LOCATIONS[0].rooms[0]);
@@ -19,6 +20,18 @@ export function CreateComplaintModal({ isOpen, onClose }) {
   const [predictedPriority, setPredictedPriority] = useState({ priority: 'low', summary: '' });
 
   const selectedLoc = INITIAL_LOCATIONS.find(l => l.block === block && l.floor === floor) || INITIAL_LOCATIONS[0];
+  const currentCategoryPresets = predefinedIssues[category] || [];
+
+  // Update title & description when selecting predefined issue preset
+  const handleIssuePresetChange = (preset) => {
+    setSelectedIssuePreset(preset);
+    if (preset && preset !== 'custom') {
+      setTitle(preset);
+      if (!description || description.startsWith('Standardized maintenance request')) {
+        setDescription(`Standardized maintenance request for ${preset} at ${room}, ${block}.`);
+      }
+    }
+  };
 
   useEffect(() => {
     if (title || description) {
@@ -128,6 +141,44 @@ export function CreateComplaintModal({ isOpen, onClose }) {
             </div>
           )}
 
+          {/* Category & Predefined Issue Dropdown Preset */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Category *
+              </label>
+              <select
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setSelectedIssuePreset('');
+                }}
+                className="w-full px-4 py-2.5 rounded-xl light-input text-xs font-bold text-slate-900"
+              >
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Select Predefined Issue Dropdown *
+              </label>
+              <select
+                value={selectedIssuePreset}
+                onChange={(e) => handleIssuePresetChange(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl light-input text-xs font-semibold text-blue-700 bg-blue-50/50 border border-blue-200"
+              >
+                <option value="">-- Choose Standardized Issue Dropdown --</option>
+                {currentCategoryPresets.map((preset, idx) => (
+                  <option key={idx} value={preset}>{preset}</option>
+                ))}
+                <option value="custom">✏️ Custom / Other Issue Title</option>
+              </select>
+            </div>
+          </div>
+
           {/* Title */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -139,40 +190,23 @@ export function CreateComplaintModal({ isOpen, onClose }) {
               placeholder="e.g. Electrical short circuit causing power cut in Room 204"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl light-input text-xs"
+              className="w-full px-4 py-2.5 rounded-xl light-input text-xs font-medium"
             />
           </div>
 
-          {/* Category & Urgency */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Category *
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl light-input text-xs"
-              >
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                User Urgency Selection *
-              </label>
-              <select
-                value={userUrgency}
-                onChange={(e) => setUserUrgency(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl light-input text-xs"
-              >
-                <option value="Standard">Standard / Routine</option>
-                <option value="Urgent">Urgent (Requires Priority Score)</option>
-              </select>
-            </div>
+          {/* Urgency Selection */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              User Urgency Selection *
+            </label>
+            <select
+              value={userUrgency}
+              onChange={(e) => setUserUrgency(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl light-input text-xs"
+            >
+              <option value="Standard">Standard / Routine</option>
+              <option value="Urgent">Urgent (Requires Priority Score Boost)</option>
+            </select>
           </div>
 
           {/* Module 3: Rule-Based Priority Prediction Box */}

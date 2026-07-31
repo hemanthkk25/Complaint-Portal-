@@ -1,19 +1,39 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { NotificationCenter } from './NotificationCenter';
 import { Zap, Search, LogOut, Shield, Wrench, User } from 'lucide-react';
 
 export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
   const { currentUser } = useApp();
+  const navigate = useNavigate();
+
+  const getRoleHome = (role) => {
+    switch (role) {
+      case 'technician':
+        return '/technician';
+      case 'supervisor':
+        return '/supervisor';
+      case 'admin':
+        return '/admin';
+      default:
+        return '/user';
+    }
+  };
+
+  const handleLogoutClick = () => {
+    if (onLogout) onLogout();
+    navigate('/login');
+  };
 
   const getRoleBadge = (role) => {
     switch (role) {
-      case 'superadmin':
-        return { label: 'Super Admin', bg: 'bg-rose-50 text-rose-700 border-rose-200/90', icon: Shield };
       case 'admin':
-        return { label: 'Admin Console', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/90', icon: Shield };
-      case 'staff':
-        return { label: 'Staff Workstation', bg: 'bg-amber-50 text-amber-800 border-amber-200/90', icon: Wrench };
+        return { label: 'System Admin', bg: 'bg-rose-50 text-rose-700 border-rose-200/90', icon: Shield };
+      case 'supervisor':
+        return { label: 'Supervisor Console', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/90', icon: Shield };
+      case 'technician':
+        return { label: 'Technician Workstation', bg: 'bg-amber-50 text-amber-800 border-amber-200/90', icon: Wrench };
       default:
         return { label: 'User Portal', bg: 'bg-blue-50 text-blue-700 border-blue-200/90', icon: User };
     }
@@ -25,7 +45,7 @@ export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
     <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo & Title */}
-        <div className="flex items-center gap-3">
+        <Link to={getRoleHome(currentUser.role)} className="flex items-center gap-3 hover:opacity-90 transition">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-4 ring-blue-50">
             <Zap className="w-5 h-5 fill-white" />
           </div>
@@ -38,7 +58,7 @@ export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
             </div>
             <p className="text-[11px] text-slate-500 hidden sm:block">Institutional Maintenance Management System</p>
           </div>
-        </div>
+        </Link>
 
         {/* Global Search Bar */}
         <div className="flex-1 max-w-sm hidden md:block">
@@ -74,7 +94,7 @@ export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
 
           {/* Logout Action Button */}
           <button
-            onClick={onLogout}
+            onClick={handleLogoutClick}
             className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 font-bold text-xs transition duration-200 shadow-2xs flex items-center gap-1.5"
             title="Log Out"
           >

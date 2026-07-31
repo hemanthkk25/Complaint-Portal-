@@ -20,6 +20,51 @@ export const INITIAL_CATEGORIES = [
   { id: 'cat-7', name: 'Fire & Emergency', departmentId: 'dept-7', basePriority: 'high', icon: 'Flame' },
 ];
 
+export const INITIAL_PREDEFINED_ISSUES = {
+  'Electrical': [
+    'Emergency main breaker spark & power cut',
+    'Ceiling Fan or Regulator fault',
+    'Tubelight / LED fixture flickering',
+    'Switchboard or power socket damaged',
+    'Wiring short circuit / burning smell'
+  ],
+  'Plumbing': [
+    'Severe water leak under sink causing flooding',
+    'Tap / Faucet broken or leaking continuously',
+    'Flush tank / Toilet drainage clogged',
+    'No main water supply / Overhead tank empty',
+    'Pipe burst / Basin drain overflow'
+  ],
+  'IT & Wi-Fi': [
+    'Wi-Fi Access Point down / No signal',
+    'LAN ethernet wall socket damaged',
+    'Lab Desktop PC network connectivity lost',
+    'Projector / HDMI display cable fault'
+  ],
+  'Civil & Carpentry': [
+    'Door lock / latch jammed or broken',
+    'Window glass pane cracked',
+    'Desk / Chair wooden frame broken',
+    'Wall paint or plaster peeling off'
+  ],
+  'HVAC & AC': [
+    'Air Conditioner not cooling / Fan only',
+    'AC indoor unit leaking water',
+    'AC remote / Thermostat sensor unresponsive',
+    'Ventilation duct making abnormal noise'
+  ],
+  'Housekeeping': [
+    'Trash / Garbage bin overflow',
+    'Washroom deep cleaning & sanitization needed',
+    'Floor liquid spill / stain cleanup required'
+  ],
+  'Fire & Emergency': [
+    'Fire alarm sensor false trip / continuous beeping',
+    'Fire extinguisher pressure gauge low',
+    'Emergency exit door indicator light unlit'
+  ]
+};
+
 export const INITIAL_LOCATIONS = [
   { id: 'loc-1', block: 'Block A - Main Academic', floor: 'Ground Floor', rooms: ['Room 101', 'Room 102', 'Auditorium A'] },
   { id: 'loc-2', block: 'Block A - Main Academic', floor: '1st Floor', rooms: ['Lab 105', 'Lab 106', 'Faculty Cabin 12'] },
@@ -28,6 +73,8 @@ export const INITIAL_LOCATIONS = [
   { id: 'loc-5', block: 'Hostel Block - Girls', floor: '1st Floor', rooms: ['Room 104', 'Study Lounge', 'Gymnasium'] },
   { id: 'loc-6', block: 'Administrative Building', floor: 'Ground Floor', rooms: ['Reception', 'Dean Office', 'Accounts Section'] },
 ];
+
+export const DEFAULT_USER_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='%2364748b'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
 
 export const INITIAL_USERS = [
   {
@@ -38,7 +85,7 @@ export const INITIAL_USERS = [
     role: 'user',
     department: 'Computer Science',
     phone: '+1 (555) 234-5678',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     createdAt: '2026-07-01T09:00:00Z',
   },
   {
@@ -49,19 +96,19 @@ export const INITIAL_USERS = [
     role: 'user',
     department: 'Mechanical Engg',
     phone: '+1 (555) 345-6789',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     createdAt: '2026-07-05T10:30:00Z',
   },
   {
     id: 'stf-1',
     name: 'Marcus Vance',
-    email: 'marcus.vance@staff.portal.edu',
+    email: 'marcus.vance@technician.portal.edu',
     password: 'password123',
-    role: 'staff',
+    role: 'technician',
     departmentId: 'dept-1', // Electrical
     departmentName: 'Electrical Engineering',
     phone: '+1 (555) 876-5432',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     activeTicketsCount: 2,
     rating: 4.9,
     ratingsCount: 15,
@@ -70,13 +117,13 @@ export const INITIAL_USERS = [
   {
     id: 'stf-2',
     name: 'David Miller',
-    email: 'david.miller@staff.portal.edu',
+    email: 'david.miller@technician.portal.edu',
     password: 'password123',
-    role: 'staff',
+    role: 'technician',
     departmentId: 'dept-2', // Plumbing
     departmentName: 'Plumbing & Water Services',
     phone: '+1 (555) 987-6543',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     activeTicketsCount: 1,
     rating: 4.6,
     ratingsCount: 8,
@@ -85,13 +132,13 @@ export const INITIAL_USERS = [
   {
     id: 'stf-3',
     name: 'Elena Rostova',
-    email: 'elena.rostova@staff.portal.edu',
+    email: 'elena.rostova@technician.portal.edu',
     password: 'password123',
-    role: 'staff',
+    role: 'technician',
     departmentId: 'dept-3', // IT
     departmentName: 'IT Infrastructure & Networking',
     phone: '+1 (555) 456-7890',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     activeTicketsCount: 0,
     rating: 4.9,
     ratingsCount: 19,
@@ -100,23 +147,40 @@ export const INITIAL_USERS = [
   {
     id: 'adm-1',
     name: 'Robert Sterling',
-    email: 'robert.sterling@admin.portal.edu',
+    email: 'robert.sterling@supervisor.portal.edu',
     password: 'password123',
-    role: 'admin',
-    department: 'Facilities Management',
+    role: 'supervisor',
+    assignedCategory: 'Electrical',
+    departmentId: 'dept-1',
+    department: 'Electrical Engineering',
+    departmentName: 'Electrical Engineering',
     phone: '+1 (555) 111-2233',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     createdAt: '2026-01-10T08:00:00Z',
+  },
+  {
+    id: 'adm-2',
+    name: 'Sarah Jenkins',
+    email: 'sarah.jenkins@supervisor.portal.edu',
+    password: 'password123',
+    role: 'supervisor',
+    assignedCategory: 'Plumbing',
+    departmentId: 'dept-2',
+    department: 'Plumbing & Water Services',
+    departmentName: 'Plumbing & Water Services',
+    phone: '+1 (555) 222-3344',
+    avatar: DEFAULT_USER_AVATAR,
+    createdAt: '2026-01-12T08:00:00Z',
   },
   {
     id: 'sup-1',
     name: 'Dr. Evelyn Vance',
-    email: 'dr.evelyn@superadmin.portal.edu',
+    email: 'dr.evelyn@admin.portal.edu',
     password: 'password123',
-    role: 'superadmin',
-    department: 'System Oversight',
+    role: 'admin',
+    department: 'System Administration',
     phone: '+1 (555) 000-1111',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    avatar: DEFAULT_USER_AVATAR,
     createdAt: '2026-01-01T08:00:00Z',
   },
 ];

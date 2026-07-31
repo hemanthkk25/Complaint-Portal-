@@ -24,8 +24,8 @@ export function ComplaintDetailModal({ complaint, isOpen, onClose }) {
 
   if (!isOpen || !complaint) return null;
 
-  const isStaff = currentUser.role === 'staff';
-  const isAdmin = currentUser.role === 'admin' || currentUser.role === 'superadmin';
+  const isStaff = currentUser.role === 'technician';
+  const isAdmin = currentUser.role === 'supervisor' || currentUser.role === 'admin';
   const isCreator = currentUser.id === complaint.createdBy?.id;
 
   const handleBeforePhotoChange = (e) => {
