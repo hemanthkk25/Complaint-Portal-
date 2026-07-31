@@ -80,7 +80,7 @@ export function SupervisorDashboard({ onSelectComplaint, searchQuery }) {
       role: 'technician',
       departmentId: selectedDeptId,
       departmentName: 'Electrical & Maintenance',
-      phone: techPhone || '+1 (555) 000-1234',
+      phone: techPhone || '+91 98000 12345',
     });
 
     setIsAddTechModalOpen(false);

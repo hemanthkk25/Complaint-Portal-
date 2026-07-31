@@ -32,7 +32,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
       assignedCategory: isSupervisor ? supervisorCategory : (role === 'supervisor' ? selectedAssignedCategory : null),
       departmentId: isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : (role === 'supervisor' ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId),
       departmentName: isSupervisor ? `${supervisorCategory} Department` : (role === 'supervisor' ? `${selectedAssignedCategory} Department` : (deptObj?.name || 'General')),
-      phone: phone.trim() || '+1 (555) 000-8888',
+      phone: phone.trim() || '+91 98000 88888',
     });
 
     setName('');
@@ -60,7 +60,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             <input
               type="text"
               required
-              placeholder="e.g. Samuel Green"
+              placeholder="e.g. Sanjay Kumar"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
@@ -72,7 +72,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             <input
               type="email"
               required
-              placeholder={isSupervisor ? `samuel.green@technician.portal.edu` : 'e.g. john@portal.edu'}
+              placeholder={isSupervisor ? `sanjay.kumar@technician.portal.edu` : 'e.g. arjun@portal.edu'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
@@ -83,7 +83,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact</label>
             <input
               type="text"
-              placeholder="+1 (555) 000-8888"
+              placeholder="+91 98000 88888"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"

@@ -7,7 +7,7 @@ export function LoginView({ onLoginSuccess }) {
   const { loginUser } = useApp();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('alex.johnson@user.portal.edu');
+  const [email, setEmail] = useState('aarav.sharma@user.portal.edu');
   const [password, setPassword] = useState('password123');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -158,47 +158,47 @@ export function LoginView({ onLoginSuccess }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('alex.johnson@user.portal.edu')}
+                onClick={() => handleQuickDemoClick('aarav.sharma@user.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">alex.johnson@user.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Alex Johnson (User)</div>
+                <div className="font-bold text-slate-900 truncate">aarav.sharma@user.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Aarav Sharma (User)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('marcus.vance@technician.portal.edu')}
+                onClick={() => handleQuickDemoClick('rajesh.kumar@technician.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">marcus.vance@technician.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Marcus Vance (Technician)</div>
+                <div className="font-bold text-slate-900 truncate">rajesh.kumar@technician.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Rajesh Kumar (Technician)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('robert.sterling@supervisor.portal.edu')}
+                onClick={() => handleQuickDemoClick('alok.gupta@supervisor.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">robert.sterling@supervisor.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Robert Sterling (Electrical Supervisor)</div>
+                <div className="font-bold text-slate-900 truncate">alok.gupta@supervisor.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Alok Gupta (Electrical Supervisor)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('sarah.jenkins@supervisor.portal.edu')}
+                onClick={() => handleQuickDemoClick('sunita.rao@supervisor.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">sarah.jenkins@supervisor.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Sarah Jenkins (Plumbing Supervisor)</div>
+                <div className="font-bold text-slate-900 truncate">sunita.rao@supervisor.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Sunita Rao (Plumbing Supervisor)</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemoClick('dr.evelyn@admin.portal.edu')}
+                onClick={() => handleQuickDemoClick('dr.anita@admin.portal.edu')}
                 className="p-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 text-left font-medium transition"
               >
-                <div className="font-bold text-slate-900 truncate">dr.evelyn@admin.portal.edu</div>
-                <div className="text-[10px] text-slate-400">Dr. Evelyn Vance (Admin)</div>
+                <div className="font-bold text-slate-900 truncate">dr.anita@admin.portal.edu</div>
+                <div className="text-[10px] text-slate-400">Dr. Anita Deshmukh (Admin)</div>
               </button>
             </div>
           </div>

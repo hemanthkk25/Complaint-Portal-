@@ -120,47 +120,94 @@ export function findBestStaffAssignment(categoryObj, allStaffList, allComplaints
  * Module 10: Duplicate Complaint Detection (Rule-Based Engine)
  * Checks existing OPEN complaints for:
  * 1. Same Category AND same Location (Block, Floor, Room)
- * 2. Created within last N hours (e.g. 48 hours)
- * 3. Title/Description substring similarity
+ * 2. Active status (submitted, assigned, in_progress)
+ * 3. Text similarity (Jaccard similarity on tokens / title / description)
  */
-export function detectDuplicates(newComplaint, existingComplaints, maxHours = 48) {
-  if (!newComplaint || !newComplaint.category || !newComplaint.location) return [];
+export function detectDuplicates(newComplaint, existingComplaints, maxHours = 168) {
+  if (!newComplaint || !existingComplaints || !Array.isArray(existingComplaints)) return [];
 
   const now = new Date().getTime();
   const timeWindowMs = maxHours * 60 * 60 * 1000;
 
   const matches = existingComplaints.filter(existing => {
-    // Only check open/unresolved tickets
-    if (['completed', 'closed'].includes(existing.status)) return false;
+    // 1. Only check open/unresolved tickets
+    const existingStatus = (existing.status || '').toLowerCase();
+    if (['completed', 'closed', 'resolved'].includes(existingStatus)) return false;
 
-    // Time window check
-    const createdTime = new Date(existing.createdAt).getTime();
-    if (now - createdTime > timeWindowMs) return false;
+    // 2. Time window check (only apply limit if timestamp exists and ticket is resolved, for open tickets extend window)
+    if (existing.createdAt) {
+      const createdTime = new Date(existing.createdAt).getTime();
+      if (!isNaN(createdTime) && (now - createdTime > timeWindowMs)) {
+        // If it's open, keep checking up to maxHours (default 7 days)
+        return false;
+      }
+    }
 
-    // Check same category
-    const sameCategory = existing.category.toLowerCase() === newComplaint.category.toLowerCase();
+    // 3. Category matching (case-insensitive, trimmed)
+    const newCat = (newComplaint.category || '').trim().toLowerCase();
+    const exCat = (existing.category || '').trim().toLowerCase();
+    const sameCategory = newCat && exCat && (newCat === exCat);
 
-    // Check same location
-    const sameBlock = existing.location?.block === newComplaint.location?.block;
-    const sameFloor = existing.location?.floor === newComplaint.location?.floor;
-    const sameRoom = existing.location?.room === newComplaint.location?.room;
+    // 4. Location matching (normalized)
+    const newLoc = newComplaint.location || {};
+    const exLoc = existing.location || {};
 
-    // Location match score
+    const sameBlock = Boolean(newLoc.block && exLoc.block && 
+      newLoc.block.trim().toLowerCase() === exLoc.block.trim().toLowerCase());
+    const sameFloor = Boolean(newLoc.floor && exLoc.floor && 
+      newLoc.floor.trim().toLowerCase() === exLoc.floor.trim().toLowerCase());
+    const sameRoom = Boolean(newLoc.room && exLoc.room && 
+      newLoc.room.trim().toLowerCase() === exLoc.room.trim().toLowerCase());
+
     const isLocationExact = sameBlock && sameFloor && sameRoom;
     const isLocationPartial = sameBlock && sameFloor;
 
-    // Text substring overlap
-    const newTitle = (newComplaint.title || '').toLowerCase();
-    const exTitle = (existing.title || '').toLowerCase();
-    const titleOverlap = newTitle.length > 5 && exTitle.length > 5 && (
+    // 5. Token-based Text Similarity (Jaccard Similarity)
+    const getTokens = (str) => {
+      if (!str) return new Set();
+      return new Set(
+        str.toLowerCase()
+          .replace(/[^a-z0-9\s]/g, '')
+          .split(/\s+/)
+          .filter(w => w.length > 2)
+      );
+    };
+
+    const newTokens = getTokens(`${newComplaint.title || ''} ${newComplaint.description || ''}`);
+    const exTokens = getTokens(`${existing.title || ''} ${existing.description || ''}`);
+
+    let jaccardSim = 0;
+    if (newTokens.size > 0 && exTokens.size > 0) {
+      const intersection = [...newTokens].filter(t => exTokens.has(t)).length;
+      const union = new Set([...newTokens, ...exTokens]).size;
+      jaccardSim = union > 0 ? intersection / union : 0;
+    }
+
+    // Substring fallback check
+    const newTitle = (newComplaint.title || '').toLowerCase().trim();
+    const exTitle = (existing.title || '').toLowerCase().trim();
+    const substringMatch = newTitle.length >= 4 && exTitle.length >= 4 && (
       newTitle.includes(exTitle) || exTitle.includes(newTitle)
     );
 
+    // Matching Criteria:
+    // A. Same category & Exact Location
     if (sameCategory && isLocationExact) {
       return true;
     }
 
-    if (sameCategory && isLocationPartial && titleOverlap) {
+    // B. Same category & Partial Location + text match (token similarity or substring)
+    if (sameCategory && isLocationPartial && (jaccardSim >= 0.2 || substringMatch)) {
+      return true;
+    }
+
+    // C. Exact Location + high text similarity even if category misclassified
+    if (isLocationExact && (jaccardSim >= 0.25 || substringMatch)) {
+      return true;
+    }
+
+    // D. High overall text similarity (e.g. campus-wide outage)
+    if (sameCategory && jaccardSim >= 0.4) {
       return true;
     }
 
@@ -169,6 +216,6 @@ export function detectDuplicates(newComplaint, existingComplaints, maxHours = 48
 
   return matches.map(match => ({
     matchedTicket: match,
-    reason: `Matching '${match.category}' complaint in ${match.location.block}, ${match.location.room} created recently (#${match.ticketId})`,
+    reason: `Matching open ticket #${match.ticketId || match.id} (${match.category}) in ${match.location?.block || ''}, ${match.location?.room || ''}`,
   }));
 }

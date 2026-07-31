@@ -50,7 +50,7 @@ export function UserManagementView() {
       role: isSupervisor ? 'technician' : role,
       departmentId: isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId,
       departmentName: isSupervisor ? `${supervisorCategory} Department` : (deptObj?.name || 'General'),
-      phone: phone || '+1 (555) 000-0000',
+      phone: phone || '+91 98000 00000',
     });
 
     setIsAddModalOpen(false);

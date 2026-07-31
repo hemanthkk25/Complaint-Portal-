@@ -29,39 +29,39 @@ export function AppProvider({ children }) {
       const parsed = JSON.parse(saved);
       // Migrate legacy emails and roles
       return parsed.map(u => {
-        if (u.id === 'adm-1' || u.email.includes('robert.sterling')) {
+        if (u.id === 'adm-1' || u.email.includes('robert.sterling') || u.email.includes('alok.gupta')) {
           return {
             ...u,
-            email: 'robert.sterling@supervisor.portal.edu',
+            email: 'alok.gupta@supervisor.portal.edu',
             role: 'supervisor',
-            name: 'Robert Sterling',
+            name: 'Alok Gupta',
             assignedCategory: u.assignedCategory || 'Electrical',
             department: 'Electrical Engineering',
             departmentName: 'Electrical Engineering'
           };
         }
-        if (u.id === 'adm-2' || u.email.includes('sarah.jenkins')) {
+        if (u.id === 'adm-2' || u.email.includes('sarah.jenkins') || u.email.includes('sunita.rao')) {
           return {
             ...u,
-            email: 'sarah.jenkins@supervisor.portal.edu',
+            email: 'sunita.rao@supervisor.portal.edu',
             role: 'supervisor',
-            name: 'Sarah Jenkins',
+            name: 'Sunita Rao',
             assignedCategory: u.assignedCategory || 'Plumbing',
             department: 'Plumbing & Water Services',
             departmentName: 'Plumbing & Water Services'
           };
         }
-        if (u.id === 'sup-1' || u.email.includes('chiefhead') || u.role === 'chief_head') {
-          return { ...u, email: 'dr.evelyn@admin.portal.edu', role: 'admin', name: 'Dr. Evelyn Vance', department: 'System Administration' };
+        if (u.id === 'sup-1' || u.email.includes('chiefhead') || u.email.includes('dr.evelyn') || u.role === 'chief_head') {
+          return { ...u, email: 'dr.anita@admin.portal.edu', role: 'admin', name: 'Dr. Anita Deshmukh', department: 'System Administration' };
         }
-        if (u.id === 'stf-1' || u.role === 'staff') {
-          return { ...u, email: 'marcus.vance@technician.portal.edu', role: 'technician', name: 'Marcus Vance' };
+        if (u.id === 'stf-1' || u.email.includes('marcus.vance')) {
+          return { ...u, email: 'rajesh.kumar@technician.portal.edu', role: 'technician', name: 'Rajesh Kumar' };
         }
-        if (u.id === 'stf-2') {
-          return { ...u, email: 'david.miller@technician.portal.edu', role: 'technician', name: 'David Miller' };
+        if (u.id === 'stf-2' || u.email.includes('david.miller')) {
+          return { ...u, email: 'suresh.verma@technician.portal.edu', role: 'technician', name: 'Suresh Verma' };
         }
-        if (u.id === 'stf-3') {
-          return { ...u, email: 'elena.rostova@technician.portal.edu', role: 'technician', name: 'Elena Rostova' };
+        if (u.id === 'stf-3' || u.email.includes('elena.rostova')) {
+          return { ...u, email: 'kavita.sharma@technician.portal.edu', role: 'technician', name: 'Kavita Sharma' };
         }
         return u;
       });
@@ -210,7 +210,7 @@ export function AppProvider({ children }) {
       role: detectedRole,
       department: deptName,
       departmentName: deptName,
-      phone: '+1 (555) 000-1111',
+      phone: '+91 99887 76655',
       avatar: detectedRole === 'staff' 
         ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' 
         : detectedRole === 'admin' || detectedRole === 'superadmin'
@@ -233,7 +233,7 @@ export function AppProvider({ children }) {
       password: userData.password || 'password123',
       role: userData.role || 'user',
       department: userData.department || 'General',
-      phone: userData.phone || '+1 (555) 000-0000',
+      phone: userData.phone || '+91 98000 00000',
       avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80`,
       createdAt: new Date().toISOString(),
     };
@@ -518,7 +518,7 @@ export function AppProvider({ children }) {
       role: userData.role,
       departmentId: userData.departmentId,
       departmentName: userData.departmentName,
-      phone: userData.phone || '+1 (555) 000-1111',
+      phone: userData.phone || '+91 99887 76655',
       avatar: DEFAULT_USER_AVATAR,
       createdAt: new Date().toISOString(),
     };
