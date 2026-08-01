@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { INITIAL_LOCATIONS } from '../data/mockData';
-import { calculatePriority } from '../utils/ruleEngine';
 import { X, Upload, Copy, Sparkles, ShieldAlert } from 'lucide-react';
 
 export function CreateComplaintModal({ isOpen, onClose }) {
@@ -17,7 +16,7 @@ export function CreateComplaintModal({ isOpen, onClose }) {
   const [userUrgency, setUserUrgency] = useState('Standard');
   const [attachments, setAttachments] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
-  const [predictedPriority, setPredictedPriority] = useState({ priority: 'low', summary: '' });
+  const [predictedPriority, setPredictedPriority] = useState({ priority: 'low', score: 15 });
 
   const selectedLoc = INITIAL_LOCATIONS.find(l => l.block === block && l.floor === floor) || INITIAL_LOCATIONS[0];
   const currentCategoryPresets = predefinedIssues[category] || [];
@@ -35,21 +34,46 @@ export function CreateComplaintModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (title || description) {
-      const pResult = calculatePriority(category, title, description, userUrgency);
-      setPredictedPriority(pResult);
+    let isMounted = true;
 
-      const dupMatches = checkDuplicateComplaints({
-        title,
-        description,
-        category,
-        location: { block, floor, room },
-      });
-      setDuplicates(dupMatches);
-    } else {
-      setPredictedPriority({ priority: 'low', summary: 'Standard low base priority' });
-      setDuplicates([]);
+    // Set priority preview indicator
+    let prio = 'low';
+    let score = 15;
+    const txt = `${title} ${description}`.toLowerCase();
+    if (['electrical', 'fire & emergency', 'fire'].includes((category || '').toLowerCase())) score += 30;
+    if (txt.includes('leak') || txt.includes('fire') || txt.includes('spark') || txt.includes('power cut') || txt.includes('short circuit')) score += 40;
+    if (userUrgency === 'Urgent') score += 20;
+
+    if (score >= 60) prio = 'high';
+    else if (score >= 35) prio = 'medium';
+
+    setPredictedPriority({ priority: prio, score });
+
+    async function checkBackendDuplicates() {
+      if (title || description) {
+        try {
+          const res = await checkDuplicateComplaints({
+            title,
+            description,
+            category,
+            block,
+            floor,
+            room,
+            userUrgency,
+          });
+          if (isMounted && res && res.duplicates) {
+            setDuplicates(res.duplicates);
+          }
+        } catch (err) {
+          console.warn('Duplicate check error:', err.message);
+        }
+      } else {
+        if (isMounted) setDuplicates([]);
+      }
     }
+
+    checkBackendDuplicates();
+    return () => { isMounted = false; };
   }, [title, description, category, block, floor, room, userUrgency]);
 
   if (!isOpen) return null;
@@ -118,12 +142,12 @@ export function CreateComplaintModal({ isOpen, onClose }) {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-          {/* Module 10: Duplicate Complaint Alert Banner */}
+          {/* Duplicate Complaint Alert Banner */}
           {duplicates.length > 0 && (
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
               <div className="flex items-center gap-2 font-bold text-xs text-amber-800">
                 <Copy className="w-4 h-4 text-amber-600" />
-                Module 10: Rule-Based Duplicate Complaint Alert!
+                Rule-Based Duplicate Complaint Alert!
               </div>
               <p className="text-xs text-slate-600">
                 A similar open ticket already exists for this category and location:

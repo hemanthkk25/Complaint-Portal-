@@ -22,16 +22,15 @@ export function AddTechnicianModal({ isOpen, onClose }) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
 
-    const deptObj = departments.find(d => d.id === departmentId);
-    const supervisorDeptObj = categories.find(c => c.name.toLowerCase() === (isSupervisor ? supervisorCategory : selectedAssignedCategory)?.toLowerCase());
+    const isTechOrSupervisor = isSupervisor || role === 'technician' || role === 'supervisor';
 
     addUserByAdmin({
       name: name.trim(),
       email: email.trim(),
       role: isSupervisor ? 'technician' : role,
       assignedCategory: isSupervisor ? supervisorCategory : (role === 'supervisor' ? selectedAssignedCategory : null),
-      departmentId: isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : (role === 'supervisor' ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId),
-      departmentName: isSupervisor ? `${supervisorCategory} Department` : (role === 'supervisor' ? `${selectedAssignedCategory} Department` : (deptObj?.name || 'General')),
+      departmentId: isTechOrSupervisor ? (isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : (role === 'supervisor' ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId)) : null,
+      departmentName: isTechOrSupervisor ? (isSupervisor ? `${supervisorCategory} Department` : (role === 'supervisor' ? `${selectedAssignedCategory} Department` : (deptObj?.name || 'Maintenance'))) : null,
       phone: phone.trim() || '+91 98000 88888',
     });
 
@@ -90,7 +89,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={isSupervisor || role === 'technician' || role === 'supervisor' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1"}>
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role Jurisdiction</label>
               {isSupervisor ? (
@@ -112,37 +111,39 @@ export function AddTechnicianModal({ isOpen, onClose }) {
               )}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                {!isSupervisor && role === 'supervisor' ? 'Assigned Category' : 'Department'}
-              </label>
-              {isSupervisor ? (
-                <div className="w-full px-3 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-extrabold flex items-center justify-between truncate">
-                  <span className="truncate">{supervisorCategory} Dept</span>
-                  <Lock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                </div>
-              ) : role === 'supervisor' ? (
-                <select
-                  value={selectedAssignedCategory}
-                  onChange={(e) => setSelectedAssignedCategory(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 font-extrabold text-indigo-950 text-xs"
-                >
-                  {categories.map(c => (
-                    <option key={c.id} value={c.name}>{c.name} Category</option>
-                  ))}
-                </select>
-              ) : (
-                <select
-                  value={departmentId}
-                  onChange={(e) => setDepartmentId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl light-input text-xs"
-                >
-                  {departments.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              )}
-            </div>
+            {(isSupervisor || role === 'technician' || role === 'supervisor') && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  {!isSupervisor && role === 'supervisor' ? 'Assigned Category' : 'Department'}
+                </label>
+                {isSupervisor ? (
+                  <div className="w-full px-3 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-extrabold flex items-center justify-between truncate">
+                    <span className="truncate">{supervisorCategory} Dept</span>
+                    <Lock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                  </div>
+                ) : role === 'supervisor' ? (
+                  <select
+                    value={selectedAssignedCategory}
+                    onChange={(e) => setSelectedAssignedCategory(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 font-extrabold text-indigo-950 text-xs"
+                  >
+                    {categories.map(c => (
+                      <option key={c.id} value={c.name}>{c.name} Category</option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl light-input text-xs"
+                  >
+                    {departments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">

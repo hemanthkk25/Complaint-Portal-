@@ -26,7 +26,7 @@ export function LoginView({ onLoginSuccess }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -35,20 +35,28 @@ export function LoginView({ onLoginSuccess }) {
       return;
     }
 
-    const res = loginUser(email, password);
-    if (res.success) {
-      onLoginSuccess(res.user);
-    } else {
-      setErrorMessage(res.message || 'Login failed.');
+    try {
+      const res = await loginUser(email, password);
+      if (res && res.success) {
+        onLoginSuccess(res.user);
+      } else {
+        setErrorMessage((res && res.message) || 'Login failed.');
+      }
+    } catch (err) {
+      setErrorMessage('Login failed: ' + err.message);
     }
   };
 
-  const handleQuickDemoClick = (demoEmail) => {
+  const handleQuickDemoClick = async (demoEmail) => {
     setEmail(demoEmail);
     setPassword('password123');
-    const res = loginUser(demoEmail, 'password123');
-    if (res.success) {
-      onLoginSuccess(res.user);
+    try {
+      const res = await loginUser(demoEmail, 'password123');
+      if (res && res.success) {
+        onLoginSuccess(res.user);
+      }
+    } catch (err) {
+      setErrorMessage('Demo login failed: ' + err.message);
     }
   };
 

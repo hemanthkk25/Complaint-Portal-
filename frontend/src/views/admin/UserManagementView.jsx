@@ -142,8 +142,10 @@ export function UserManagementView() {
                           <span className="font-bold text-indigo-800">{u.assignedCategory || supervisorCategory}</span>
                         )}
                       </div>
-                    ) : (
+                    ) : u.role === 'technician' ? (
                       u.departmentName || u.department || 'N/A'
+                    ) : (
+                      'N/A'
                     )}
                   </td>
                   <td className="p-4 text-slate-600 font-mono text-[11px]">{u.phone}</td>
