@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { StatusBadge } from './StatusBadge';
 import { PriorityBadge } from './PriorityBadge';
@@ -21,6 +21,12 @@ export function ComplaintDetailModal({ complaint, isOpen, onClose }) {
   const [beforeFile, setBeforeFile] = useState(null);
   const [afterFile, setAfterFile] = useState(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
+
+  useEffect(() => {
+    setBeforeFile(null);
+    setAfterFile(null);
+    setResolutionNotes('');
+  }, [complaint?.id, isOpen]);
 
   if (!isOpen || !complaint) return null;
 

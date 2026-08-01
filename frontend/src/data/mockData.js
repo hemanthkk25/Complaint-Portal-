@@ -289,7 +289,7 @@ export const INITIAL_COMPLAINTS = [
       department: 'Electrical Engineering',
     },
     attachments: [
-      'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
     ],
     beforeImageUrl: null,
     afterImageUrl: null,
