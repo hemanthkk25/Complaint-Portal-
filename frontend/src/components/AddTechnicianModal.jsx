@@ -18,19 +18,41 @@ export function AddTechnicianModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
 
-    const isTechOrSupervisor = isSupervisor || role === 'technician' || role === 'supervisor';
+    const deptObj = departments.find(d => d.id === departmentId);
+    const targetCategoryName = isSupervisor ? supervisorCategory : selectedAssignedCategory;
+    const supervisorCategoryObj = categories.find(c => c.name.toLowerCase() === (targetCategoryName || '').toLowerCase());
 
-    addUserByAdmin({
+    const effectiveRole = isSupervisor ? 'technician' : role;
+    const isTechOrSupervisor = effectiveRole === 'technician' || effectiveRole === 'supervisor';
+
+    let resolvedDeptId = null;
+    let resolvedDeptName = null;
+
+    if (isTechOrSupervisor) {
+      if (effectiveRole === 'supervisor') {
+        resolvedDeptId = supervisorCategoryObj?.departmentId || 'dept-1';
+        resolvedDeptName = `${targetCategoryName} Department`;
+      } else if (isSupervisor) {
+        resolvedDeptId = supervisorCategoryObj?.departmentId || 'dept-1';
+        resolvedDeptName = `${supervisorCategory} Department`;
+      } else {
+        resolvedDeptId = departmentId || 'dept-1';
+        resolvedDeptName = deptObj?.name || 'Electrical Engineering';
+      }
+    }
+
+    await addUserByAdmin({
       name: name.trim(),
       email: email.trim(),
-      role: isSupervisor ? 'technician' : role,
-      assignedCategory: isSupervisor ? supervisorCategory : (role === 'supervisor' ? selectedAssignedCategory : null),
-      departmentId: isTechOrSupervisor ? (isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : (role === 'supervisor' ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId)) : null,
-      departmentName: isTechOrSupervisor ? (isSupervisor ? `${supervisorCategory} Department` : (role === 'supervisor' ? `${selectedAssignedCategory} Department` : (deptObj?.name || 'Maintenance'))) : null,
+      role: effectiveRole,
+      assignedCategory: effectiveRole === 'supervisor' ? targetCategoryName : (isSupervisor ? supervisorCategory : null),
+      departmentId: resolvedDeptId,
+      departmentName: resolvedDeptName,
+      department: resolvedDeptName,
       phone: phone.trim() || '+91 98000 88888',
     });
 

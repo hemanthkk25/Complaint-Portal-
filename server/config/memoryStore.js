@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+const DEFAULT_USER_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23475569'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E";
+
 export const initialSeedData = {
   users: [
     {
@@ -11,7 +13,7 @@ export const initialSeedData = {
       departmentId: null,
       departmentName: null,
       phone: '+91 98123 45678',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       isDeactivated: false,
     },
     {
@@ -23,7 +25,7 @@ export const initialSeedData = {
       departmentId: null,
       departmentName: null,
       phone: '+91 98234 56789',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       isDeactivated: false,
     },
     {
@@ -36,7 +38,7 @@ export const initialSeedData = {
       departmentName: 'Electrical Engineering',
       department: 'Electrical Engineering',
       phone: '+91 98450 12345',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       activeTicketsCount: 2,
       rating: 4.9,
       isDeactivated: false,
@@ -51,7 +53,7 @@ export const initialSeedData = {
       departmentName: 'Plumbing & Water Services',
       department: 'Plumbing & Water Services',
       phone: '+91 97312 34567',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       activeTicketsCount: 1,
       rating: 4.6,
       isDeactivated: false,
@@ -66,7 +68,7 @@ export const initialSeedData = {
       departmentName: 'IT Infrastructure & Networking',
       department: 'IT Infrastructure & Networking',
       phone: '+91 99001 56789',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       activeTicketsCount: 0,
       rating: 4.9,
       isDeactivated: false,
@@ -82,7 +84,7 @@ export const initialSeedData = {
       department: 'Electrical Engineering',
       departmentName: 'Electrical Engineering',
       phone: '+91 98200 11223',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       isDeactivated: false,
     },
     {
@@ -96,7 +98,7 @@ export const initialSeedData = {
       department: 'Plumbing & Water Services',
       departmentName: 'Plumbing & Water Services',
       phone: '+91 98333 44556',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       isDeactivated: false,
     },
     {
@@ -107,7 +109,7 @@ export const initialSeedData = {
       role: 'admin',
       department: 'System Administration',
       phone: '+91 99887 76655',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      avatar: DEFAULT_USER_AVATAR,
       isDeactivated: false,
     },
   ],
@@ -180,7 +182,7 @@ export const initialSeedData = {
       status: 'assigned',
       userUrgency: 'Urgent',
       createdBy: { id: 'usr-1', name: 'Aarav Sharma', email: 'aarav.sharma@user.portal.edu' },
-      assignedTo: { id: 'stf-1', name: 'Rajesh Kumar', department: 'Electrical Engineering', email: 'rajesh.kumar@technician.portal.edu', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+      assignedTo: { id: 'stf-1', name: 'Rajesh Kumar', department: 'Electrical Engineering', email: 'rajesh.kumar@technician.portal.edu', avatar: DEFAULT_USER_AVATAR },
       attachments: ['https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=600&auto=format&fit=crop&q=80'],
       createdAt: new Date('2026-07-31T11:00:00Z'),
       updatedAt: new Date('2026-07-31T11:05:00Z'),
@@ -199,7 +201,7 @@ export const initialSeedData = {
       status: 'in_progress',
       userUrgency: 'Urgent',
       createdBy: { id: 'usr-1', name: 'Aarav Sharma', email: 'aarav.sharma@user.portal.edu' },
-      assignedTo: { id: 'stf-2', name: 'Suresh Verma', department: 'Plumbing & Water Services', email: 'suresh.verma@technician.portal.edu', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
+      assignedTo: { id: 'stf-2', name: 'Suresh Verma', department: 'Plumbing & Water Services', email: 'suresh.verma@technician.portal.edu', avatar: DEFAULT_USER_AVATAR },
       attachments: ['https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&auto=format&fit=crop&q=80'],
       createdAt: new Date('2026-07-28T14:20:00Z'),
       updatedAt: new Date('2026-07-29T10:15:00Z'),
