@@ -27,6 +27,7 @@ function MainApp() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getRoleDefaultPath = (role) => {
     if (role === 'user') return '/user';
@@ -62,13 +63,13 @@ function MainApp() {
             <Navigate to="/login" replace />
           ) : (
             <div className="min-h-screen bg-slate-100 text-slate-900 flex font-sans">
-              {/* Full-Height Vertical Side Navigation Bar (Only for Supervisor & Admin) */}
-              {(currentUser.role === 'supervisor' || currentUser.role === 'admin') && (
-                <Sidebar
-                  onOpenCreateModal={() => setIsCreateModalOpen(true)}
-                  onLogout={() => setIsAuthenticated(false)}
-                />
-              )}
+              {/* Full-Height Side Navigation Bar with Mobile Drawer */}
+              <Sidebar
+                onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                onLogout={() => setIsAuthenticated(false)}
+                isOpenMobile={isMobileMenuOpen}
+                onCloseMobile={() => setIsMobileMenuOpen(false)}
+              />
 
               {/* Right Content Panel */}
               <div className="flex-1 flex flex-col min-w-0 min-h-screen">
@@ -77,6 +78,7 @@ function MainApp() {
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   onLogout={() => setIsAuthenticated(false)}
+                  onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 />
 
                 {/* Dynamic Route View Area */}

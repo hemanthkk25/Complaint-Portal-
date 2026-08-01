@@ -91,7 +91,7 @@ export function AdminDashboard({ onSelectComplaint, searchQuery }) {
             className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 font-extrabold text-xs transition flex items-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
-            + Create Account
+            + Add System User
           </button>
         </div>
       </div>
@@ -180,9 +180,8 @@ export function AdminDashboard({ onSelectComplaint, searchQuery }) {
                     <h4 className="font-extrabold text-slate-900 text-sm">{cat.name}</h4>
                     <p className="text-[11px] text-slate-500 font-medium mt-0.5">{cat.description || 'Facility Maintenance'}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    activeTickets > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-                  }`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${activeTickets > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
                     {activeTickets} active
                   </span>
                 </div>

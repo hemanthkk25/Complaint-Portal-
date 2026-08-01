@@ -110,6 +110,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Row 1: Full Name & Phone Contact */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name *</label>
@@ -123,6 +124,21 @@ export function AddTechnicianModal({ isOpen, onClose }) {
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact *</label>
+              <input
+                type="text"
+                required
+                placeholder="+91 98000 88888"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Role Jurisdiction & Department */}
+          <div className={isSupervisor || role === 'technician' || role === 'supervisor' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1"}>
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role Jurisdiction</label>
               {isSupervisor ? (
@@ -142,23 +158,6 @@ export function AddTechnicianModal({ isOpen, onClose }) {
                   <option value="admin">Admin</option>
                 </select>
               )}
-            </div>
-          </div>
-
-          <div className={isSupervisor || role === 'technician' || role === 'supervisor' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1"}>
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address *</label>
-                <span className="text-[10px] text-indigo-600 font-mono font-bold">{getEmailDomainHint()}</span>
-              </div>
-              <input
-                type="email"
-                required
-                placeholder={getEmailPlaceholder()}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
-              />
             </div>
 
             {(isSupervisor || role === 'technician' || role === 'supervisor') && (
@@ -196,14 +195,18 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             )}
           </div>
 
+          {/* Row 3: Separate Email Input Field */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact *</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address *</label>
+              <span className="text-[10px] text-indigo-600 font-mono font-bold">{getEmailDomainHint()}</span>
+            </div>
             <input
-              type="text"
+              type="email"
               required
-              placeholder="+91 98000 88888"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              placeholder={getEmailPlaceholder()}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
             />
           </div>

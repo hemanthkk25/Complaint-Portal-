@@ -2,9 +2,9 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { NotificationCenter } from './NotificationCenter';
-import { Zap, Search, LogOut, Shield, Wrench, User } from 'lucide-react';
+import { Zap, Search, LogOut, Shield, Wrench, User, Menu } from 'lucide-react';
 
-export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
+export function Navbar({ searchQuery, setSearchQuery, onLogout, onToggleMobileMenu }) {
   const { currentUser } = useApp();
   const navigate = useNavigate();
 
@@ -44,21 +44,31 @@ export function Navbar({ searchQuery, setSearchQuery, onLogout }) {
   return (
     <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand Logo & Title */}
-        <Link to={getRoleHome(currentUser.role)} className="flex items-center gap-3 hover:opacity-90 transition">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-4 ring-blue-50">
-            <Zap className="w-5 h-5 fill-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-extrabold text-base text-slate-900 tracking-tight">Complaint Portal</h1>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shadow-2xs ${roleInfo.bg}`}>
-                {roleInfo.label}
-              </span>
+        {/* Left Side: Mobile Menu Button & Brand Logo */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleMobileMenu}
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center md:hidden transition"
+            title="Toggle Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <Link to={getRoleHome(currentUser.role)} className="flex items-center gap-3 hover:opacity-90 transition">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-4 ring-blue-50">
+              <Zap className="w-5 h-5 fill-white" />
             </div>
-            <p className="text-[11px] text-slate-500 hidden sm:block">Institutional Maintenance Management System</p>
-          </div>
-        </Link>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-extrabold text-base text-slate-900 tracking-tight">Complaint Portal</h1>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shadow-2xs ${roleInfo.bg}`}>
+                  {roleInfo.label}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 hidden sm:block">Institutional Maintenance Management System</p>
+            </div>
+          </Link>
+        </div>
 
         {/* Global Search Bar */}
         <div className="flex-1 max-w-sm hidden md:block">

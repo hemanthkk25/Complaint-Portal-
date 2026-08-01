@@ -3,12 +3,14 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
   LayoutDashboard, Wrench, BarChart3, Users, ShieldAlert, Settings, PlusCircle,
-  Ticket, Tag, Zap, LogOut, FolderPlus
+  Ticket, Tag, Zap, LogOut, FolderPlus, X, User as UserIcon
 } from 'lucide-react';
 
-export function Sidebar({ onOpenCreateModal, onLogout }) {
+export function Sidebar({ onOpenCreateModal, onLogout, isOpenMobile, onCloseMobile }) {
   const { currentUser, complaints } = useApp();
   const navigate = useNavigate();
+
+  if (!currentUser) return null;
 
   const role = currentUser.role;
   const supervisorCategory = currentUser.assignedCategory || 'Electrical';
@@ -16,23 +18,39 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
   const technicianQueueCount = complaints.filter(c => c.assignedTo?.id === currentUser.id && c.status !== 'completed').length;
   const adminPendingCount = complaints.filter(c => c.status !== 'completed').length;
   const supervisorPendingCount = complaints.filter(c => c.category?.toLowerCase() === supervisorCategory.toLowerCase() && c.status !== 'completed').length;
+  const userOpenCount = complaints.filter(c => c.createdBy?.id === currentUser.id && c.status !== 'completed').length;
 
   const handleLogoutClick = () => {
     if (onLogout) onLogout();
+    if (onCloseMobile) onCloseMobile();
     navigate('/login');
   };
 
-  return (
-    <aside className="w-64 shrink-0 hidden md:flex flex-col bg-white text-slate-900 border-r border-slate-200/80 min-h-screen z-40 select-none shadow-xs">
+  const handleLinkClick = () => {
+    if (onCloseMobile) onCloseMobile();
+  };
+
+  const renderNavContent = () => (
+    <>
       {/* Sidebar Header Brand Logo */}
-      <div className="p-5 border-b border-slate-200/80 flex items-center gap-3 bg-slate-50/50">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 ring-4 ring-blue-50">
-          <Zap className="w-5 h-5 fill-white" />
+      <div className="p-5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 ring-4 ring-blue-50">
+            <Zap className="w-5 h-5 fill-white" />
+          </div>
+          <div>
+            <h1 className="font-extrabold text-sm text-slate-900 tracking-tight leading-tight">Complaint Portal</h1>
+            <p className="text-[10px] text-slate-500 font-semibold">Facility Management System</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-extrabold text-sm text-slate-900 tracking-tight leading-tight">Complaint Portal</h1>
-          <p className="text-[10px] text-slate-500 font-semibold">Facility Management System</p>
-        </div>
+        {onCloseMobile && (
+          <button
+            onClick={onCloseMobile}
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Main Navigation Body */}
@@ -44,11 +62,53 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
           </div>
 
           <nav className="space-y-1">
+            {/* User Links */}
+            {role === 'user' && (
+              <>
+                <NavLink
+                  to="/user"
+                  end
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                    }`
+                  }
+                >
+                  <div className="flex items-center gap-2.5">
+                    <UserIcon className="w-4 h-4 text-blue-600" />
+                    My Complaints Portal
+                  </div>
+                  {userOpenCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">
+                      {userOpenCount}
+                    </span>
+                  )}
+                </NavLink>
+
+                {onOpenCreateModal && (
+                  <button
+                    onClick={() => {
+                      onOpenCreateModal();
+                      handleLinkClick();
+                    }}
+                    className="w-full mt-2 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 hover:opacity-95 transition"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Raise New Complaint
+                  </button>
+                )}
+              </>
+            )}
+
             {/* Technician Workstation Links */}
             {role === 'technician' && (
               <NavLink
                 to="/technician"
                 end
+                onClick={handleLinkClick}
                 className={({ isActive }) =>
                   `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                     isActive
@@ -81,6 +141,7 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                 <NavLink
                   to={role === 'admin' ? '/admin' : '/supervisor'}
                   end
+                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                       isActive
@@ -104,9 +165,10 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                   )}
                 </NavLink>
 
-                {/* 2. Manage Users & Roles / Manage Technicians */}
+                {/* Manage Users */}
                 <NavLink
                   to={role === 'admin' ? '/admin/users' : '/supervisor/users'}
+                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                       isActive
@@ -121,10 +183,11 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                   </div>
                 </NavLink>
 
-                {/* 3. Categories & Departments (Admin only) */}
+                {/* Categories & Departments (Admin only) */}
                 {role === 'admin' && (
                   <NavLink
                     to="/admin/categories"
+                    onClick={handleLinkClick}
                     className={({ isActive }) =>
                       `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                         isActive
@@ -140,9 +203,10 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                   </NavLink>
                 )}
 
-                {/* 4. Issue Dropdown Templates */}
+                {/* Issue Dropdown Templates */}
                 <NavLink
                   to={role === 'admin' ? '/admin/issue-presets' : '/supervisor/issue-presets'}
+                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                       isActive
@@ -157,9 +221,10 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                   </div>
                 </NavLink>
 
-                {/* 5. Analytics & Reports */}
+                {/* Analytics & Reports */}
                 <NavLink
                   to={role === 'admin' ? '/admin/analytics' : '/supervisor/analytics'}
+                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                       isActive
@@ -174,9 +239,10 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                   </div>
                 </NavLink>
 
-                {/* 6. Audit Security Logs */}
+                {/* Audit Security Logs */}
                 <NavLink
                   to={role === 'admin' ? '/admin/audit-logs' : '/supervisor/audit-logs'}
+                  onClick={handleLinkClick}
                   className={({ isActive }) =>
                     `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                       isActive
@@ -192,8 +258,6 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
                 </NavLink>
               </>
             )}
-
-
           </nav>
         </div>
       </div>
@@ -222,6 +286,30 @@ export function Sidebar({ onOpenCreateModal, onLogout }) {
           <LogOut className="w-4 h-4" />
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar (visible on md screens and up) */}
+      <aside className="w-64 shrink-0 hidden md:flex flex-col bg-white text-slate-900 border-r border-slate-200/80 min-h-screen z-40 select-none shadow-xs">
+        {renderNavContent()}
+      </aside>
+
+      {/* Mobile Sliding Overlay Drawer (visible on mobile when toggled) */}
+      {isOpenMobile && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop Overlay */}
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+            onClick={onCloseMobile}
+          />
+          {/* Mobile Drawer Panel */}
+          <aside className="relative w-72 max-w-[85vw] bg-white text-slate-900 h-full flex flex-col shadow-2xl z-10 overflow-hidden">
+            {renderNavContent()}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
