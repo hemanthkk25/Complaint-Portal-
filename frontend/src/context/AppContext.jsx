@@ -152,6 +152,17 @@ export function AppProvider({ children }) {
     });
     if (res.success) {
       await refreshBackendData();
+      const targetCmp = complaints.find(c => c.id === complaintId);
+      if (targetCmp?.createdBy?.id) {
+        sendNotification(
+          targetCmp.createdBy.id,
+          `Ticket Status Updated (${newStatus.toUpperCase()})`,
+          `Your complaint #${targetCmp.ticketId} status has been updated to '${newStatus.replace(/_/g, ' ')}'.`,
+          'status_update',
+          complaintId,
+          targetCmp.ticketId
+        );
+      }
     }
   };
 
@@ -162,6 +173,17 @@ export function AppProvider({ children }) {
     });
     if (res.success) {
       await refreshBackendData();
+      const targetCmp = complaints.find(c => c.id === complaintId);
+      if (targetCmp?.createdBy?.id) {
+        sendNotification(
+          targetCmp.createdBy.id,
+          'Technician Reassigned',
+          `Your complaint #${targetCmp.ticketId} has been reassigned to a new technician for resolution.`,
+          'reassigned',
+          complaintId,
+          targetCmp.ticketId
+        );
+      }
     }
   };
 

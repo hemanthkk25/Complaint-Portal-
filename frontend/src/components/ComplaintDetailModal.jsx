@@ -13,7 +13,7 @@ import {
 import confetti from 'canvas-confetti';
 
 export function ComplaintDetailModal({ complaint, isOpen, onClose }) {
-  const { currentUser, updateComplaintStatus, statusHistory } = useApp();
+  const { currentUser, updateComplaintStatus, statusHistory, auditLogs } = useApp();
 
   const [isReassignOpen, setIsReassignOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -129,20 +129,20 @@ export function ComplaintDetailModal({ complaint, isOpen, onClose }) {
             <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-xs space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-indigo-900">
                 <ShieldAlert className="w-4 h-4 text-indigo-600" />
-                Module 3: Rule-Based Priority Score Details
+                Rule-Based Priority Score Details
               </div>
               <p className="text-indigo-950 leading-relaxed">{complaint.priorityReason}</p>
             </div>
 
-            {/* Module 5 & 7: Timeline & Audit History */}
+            {/* Timeline & Track Progress */}
             <div>
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Ticket Timeline & Progress</h4>
-              <TimelineStepper complaint={complaint} statusHistory={statusHistory} />
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Ticket Timeline & Track Progress</h4>
+              <TimelineStepper complaint={complaint} statusHistory={statusHistory} auditLogs={auditLogs} />
             </div>
 
-            {/* Module 8: Before & After Proof */}
+            {/* Before & After Proof */}
             <BeforeAfterViewer
-              beforeImageUrl={beforeFile || complaint.beforeImageUrl}
+              beforeImageUrl={beforeFile || complaint.beforeImageUrl || (complaint.attachments && complaint.attachments.length > 0 ? complaint.attachments[0] : null)}
               afterImageUrl={afterFile || complaint.afterImageUrl}
             />
 

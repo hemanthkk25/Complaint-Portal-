@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, UserCheck, Wrench, CheckCircle2, Calendar, User } from 'lucide-react';
 
-export function TimelineStepper({ complaint, statusHistory = [] }) {
+export function TimelineStepper({ complaint, statusHistory = [], auditLogs = [] }) {
   const steps = [
     { key: 'submitted', label: 'Submitted', icon: Clock },
     { key: 'assigned', label: 'Assigned', icon: UserCheck },
@@ -12,8 +12,41 @@ export function TimelineStepper({ complaint, statusHistory = [] }) {
   const statusOrder = ['submitted', 'assigned', 'in_progress', 'completed'];
   const currentIndex = statusOrder.indexOf(complaint.status);
 
-  // Filter history logs for this specific ticket
-  const ticketHistory = statusHistory.filter(h => h.complaintId === complaint.id);
+  // Combine status history & audit logs matching this ticket
+  const statusItems = (statusHistory || []).filter(h => h.complaintId === complaint.id || h.complaintId === complaint.ticketId);
+  const auditItems = (auditLogs || [])
+    .filter(l => l.targetId === complaint.id || (l.details && (l.details.includes(complaint.ticketId) || l.details.includes(complaint.id))))
+    .map(l => ({
+      id: l.id,
+      complaintId: complaint.id,
+      notes: `${l.action.replace(/_/g, ' ')}: ${l.details}`,
+      changedBy: `${l.userName} (${l.userRole})`,
+      timestamp: l.timestamp,
+    }));
+
+  const rawHistory = [...statusItems, ...auditItems];
+  if (rawHistory.length === 0) {
+    rawHistory.push({
+      id: `default-creation-${complaint.id}`,
+      complaintId: complaint.id,
+      notes: `Ticket #${complaint.ticketId} registered with ${complaint.priority.toUpperCase()} priority`,
+      changedBy: `${complaint.createdBy?.name || 'User'} (User)`,
+      timestamp: complaint.createdAt || new Date().toISOString(),
+    });
+    if (complaint.assignedTo?.name) {
+      rawHistory.push({
+        id: `default-assignment-${complaint.id}`,
+        complaintId: complaint.id,
+        notes: `Workorder assigned to technician ${complaint.assignedTo.name}`,
+        changedBy: `System Dispatcher`,
+        timestamp: complaint.updatedAt || complaint.createdAt || new Date().toISOString(),
+      });
+    }
+  }
+
+  // Remove duplicates by ID and sort descending
+  const ticketHistory = Array.from(new Map(rawHistory.map(item => [item.id, item])).values())
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
     <div className="space-y-6">
@@ -58,11 +91,11 @@ export function TimelineStepper({ complaint, statusHistory = [] }) {
         })}
       </div>
 
-      {/* Audit History Log */}
+      {/* Track Progress & Action Audit History */}
       <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
         <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-blue-600" />
-          Chronological Audit History
+          Track Progress & Action Audit History
         </h4>
 
         {ticketHistory.length === 0 ? (

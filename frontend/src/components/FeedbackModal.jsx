@@ -4,16 +4,16 @@ import { Star, X, MessageSquare, Send } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export function FeedbackModal({ isOpen, onClose, complaint }) {
-  const { submitFeedback } = useApp();
+  const { addFeedbackRating } = useApp();
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
 
   if (!isOpen || !complaint) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    submitFeedback(complaint.id, rating, comment);
+    await addFeedbackRating(complaint.id, rating, comment);
 
     confetti({
       particleCount: 50,
@@ -30,7 +30,7 @@ export function FeedbackModal({ isOpen, onClose, complaint }) {
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-            <h3 className="font-bold text-slate-900 text-sm">Module 11: Rate Resolution Quality</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Rate Resolution Quality</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-700">
             <X className="w-5 h-5" />
