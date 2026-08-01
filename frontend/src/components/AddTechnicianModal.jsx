@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserPlus, X, Lock, Shield } from 'lucide-react';
 
@@ -15,6 +15,40 @@ export function AddTechnicianModal({ isOpen, onClose }) {
   const [phone, setPhone] = useState('');
 
   const [selectedAssignedCategory, setSelectedAssignedCategory] = useState(categories[0]?.name || 'Electrical');
+
+  const getEmailDomainHint = () => {
+    if (isSupervisor) return '@technician.portal.edu';
+    switch (role) {
+      case 'user':
+        return '@user.portal.edu';
+      case 'technician':
+        return '@technician.portal.edu';
+      case 'supervisor':
+        return '@supervisor.portal.edu';
+      case 'admin':
+        return '@admin.portal.edu';
+      default:
+        return '@portal.edu';
+    }
+  };
+
+  const getEmailPlaceholder = () => {
+    return `username${getEmailDomainHint()}`;
+  };
+
+  // Pre-fill the role-based default domain directly inside the input field value
+  useEffect(() => {
+    if (!isOpen) return;
+    const domain = getEmailDomainHint();
+    if (!email) {
+      setEmail(domain);
+    } else if (email.includes('@')) {
+      const username = email.split('@')[0];
+      setEmail(`${username}${domain}`);
+    } else {
+      setEmail(`${email}${domain}`);
+    }
+  }, [role, isSupervisor, isOpen]);
 
   if (!isOpen) return null;
 
@@ -68,7 +102,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
         <div className="flex justify-between items-center pb-3 border-b border-slate-200">
           <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-indigo-600" />
-            {isSupervisor ? `Add New ${supervisorCategory} Technician` : 'Create Portal Account'}
+            {isSupervisor ? `Add New ${supervisorCategory} Technician` : `Create ${role.charAt(0).toUpperCase() + role.slice(1)} Account`}
           </h3>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
             <X className="w-5 h-5" />
@@ -76,43 +110,19 @@ export function AddTechnicianModal({ isOpen, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Sanjay Kumar"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name *</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Sanjay Kumar"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email Address *</label>
-            <input
-              type="email"
-              required
-              placeholder={isSupervisor ? `sanjay.kumar@technician.portal.edu` : 'e.g. arjun@portal.edu'}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact *</label>
-            <input
-              type="text"
-              required
-              placeholder="+91 98000 88888"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
-            />
-          </div>
-
-          <div className={isSupervisor || role === 'technician' || role === 'supervisor' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1"}>
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role Jurisdiction</label>
               {isSupervisor ? (
@@ -132,6 +142,23 @@ export function AddTechnicianModal({ isOpen, onClose }) {
                   <option value="admin">Admin</option>
                 </select>
               )}
+            </div>
+          </div>
+
+          <div className={isSupervisor || role === 'technician' || role === 'supervisor' ? "grid grid-cols-2 gap-3" : "grid grid-cols-1"}>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address *</label>
+                <span className="text-[10px] text-indigo-600 font-mono font-bold">{getEmailDomainHint()}</span>
+              </div>
+              <input
+                type="email"
+                required
+                placeholder={getEmailPlaceholder()}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
+              />
             </div>
 
             {(isSupervisor || role === 'technician' || role === 'supervisor') && (
@@ -169,6 +196,18 @@ export function AddTechnicianModal({ isOpen, onClose }) {
             )}
           </div>
 
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact *</label>
+            <input
+              type="text"
+              required
+              placeholder="+91 98000 88888"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl light-input text-xs"
+            />
+          </div>
+
           <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
             <button
               type="button"
@@ -181,7 +220,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
               type="submit"
               className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-500/20 transition"
             >
-              Save Technician
+              {isSupervisor ? 'Save Technician' : `Save ${role.charAt(0).toUpperCase() + role.slice(1)}`}
             </button>
           </div>
         </form>

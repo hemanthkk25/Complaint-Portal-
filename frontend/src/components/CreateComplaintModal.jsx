@@ -21,15 +21,13 @@ export function CreateComplaintModal({ isOpen, onClose }) {
   const selectedLoc = INITIAL_LOCATIONS.find(l => l.block === block && l.floor === floor) || INITIAL_LOCATIONS[0];
   const currentCategoryPresets = predefinedIssues[category] || [];
 
-  // Update title & description when selecting predefined issue preset
+  // Update title when selecting predefined issue preset (description must be manually filled by user)
   const handleIssuePresetChange = (preset) => {
     setSelectedIssuePreset(preset);
     if (preset && preset !== 'custom') {
       setTitle(preset);
-      setDescription(`Standardized maintenance request for ${preset} at ${room}, ${block}.`);
     } else if (preset === 'custom') {
       setTitle('');
-      setDescription('');
     }
   };
 
@@ -303,7 +301,7 @@ export function CreateComplaintModal({ isOpen, onClose }) {
             <textarea
               required
               rows={4}
-              placeholder="Describe the issue in detail. Emergency keywords like 'leak', 'fire', 'short circuit' automatically compute High Priority..."
+              placeholder="Enter detailed description of the issue... (Mandatory - Please provide specific details about the fault or location)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl light-input text-xs leading-relaxed"
