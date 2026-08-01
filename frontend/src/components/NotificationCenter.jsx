@@ -7,8 +7,14 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Filter notifications for current user
-  const userNotifs = notifications.filter(n => n.userId === currentUser.id);
-  const unreadCount = userNotifs.filter(n => !n.isRead).length;
+  const userNotifs = notifications.filter(n => n.userId === currentUser?.id);
+  const unreadCount = userNotifs.filter(n => !(n.isRead || n.read)).length;
+
+  const handleMarkAllRead = () => {
+    if (currentUser?.id) {
+      markAllNotificationsRead(currentUser.id);
+    }
+  };
 
   return (
     <div className="relative">
@@ -40,7 +46,7 @@ export function NotificationCenter() {
             </div>
             {unreadCount > 0 && (
               <button
-                onClick={markAllNotificationsRead}
+                onClick={handleMarkAllRead}
                 className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-semibold hover:underline"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
@@ -57,39 +63,46 @@ export function NotificationCenter() {
                 No notifications yet
               </div>
             ) : (
-              userNotifs.map(notif => (
-                <div
-                  key={notif.id}
-                  onClick={() => markNotificationRead(notif.id)}
-                  className={`p-4 transition-colors cursor-pointer flex gap-3 ${
-                    notif.isRead ? 'bg-white hover:bg-slate-50 opacity-75' : 'bg-blue-50/40 hover:bg-blue-50'
-                  }`}
-                >
-                  <div className="mt-0.5">
-                    {notif.type === 'assignment' && <Ticket className="w-4 h-4 text-amber-600" />}
-                    {notif.type === 'completion' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
-                    {notif.type === 'status_change' && <Clock className="w-4 h-4 text-blue-600" />}
-                    {notif.type === 'creation' && <ShieldAlert className="w-4 h-4 text-purple-600" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-0.5">
-                      <h4 className="text-xs font-bold text-slate-900">{notif.title}</h4>
-                      <span className="text-[10px] text-slate-400">
-                        {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+              userNotifs.map(notif => {
+                const isRead = notif.isRead || notif.read;
+                const dateVal = notif.createdAt || notif.timestamp;
+                const timeDisplay = dateVal ? new Date(dateVal).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
+
+                return (
+                  <div
+                    key={notif.id}
+                    onClick={() => markNotificationRead(notif.id)}
+                    className={`p-4 transition-colors cursor-pointer flex gap-3 ${
+                      isRead ? 'bg-white hover:bg-slate-50 opacity-75' : 'bg-blue-50/40 hover:bg-blue-50 font-semibold'
+                    }`}
+                  >
+                    <div className="mt-0.5">
+                      {notif.type === 'assignment' && <Ticket className="w-4 h-4 text-amber-600" />}
+                      {notif.type === 'completion' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                      {notif.type === 'status_change' && <Clock className="w-4 h-4 text-blue-600" />}
+                      {notif.type === 'creation' && <ShieldAlert className="w-4 h-4 text-purple-600" />}
+                      {!['assignment', 'completion', 'status_change', 'creation'].includes(notif.type) && <Clock className="w-4 h-4 text-blue-600" />}
                     </div>
-                    <p className="text-xs text-slate-600 leading-snug">{notif.message}</p>
-                    {notif.ticketId && (
-                      <span className="inline-block mt-1 text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                        #{notif.ticketId}
-                      </span>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-0.5">
+                        <h4 className="text-xs font-bold text-slate-900">{notif.title}</h4>
+                        <span className="text-[10px] text-slate-400">
+                          {timeDisplay}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-snug">{notif.message}</p>
+                      {notif.ticketId && (
+                        <span className="inline-block mt-1 text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                          #{notif.ticketId}
+                        </span>
+                      )}
+                    </div>
+                    {!isRead && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 self-center shrink-0" />
                     )}
                   </div>
-                  {!notif.isRead && (
-                    <div className="w-2 h-2 rounded-full bg-blue-600 self-center" />
-                  )}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

@@ -55,14 +55,17 @@ export function AppProvider({ children }) {
   }, []);
 
   const sendNotification = (userId, title, message, type = 'info', complaintId = null, ticketId = null) => {
+    const nowStr = new Date().toISOString();
     const newNotif = {
-      id: `notif-${Date.now()}-${Math.random()}`,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       userId,
       title,
       message,
       type,
       read: false,
-      timestamp: new Date().toISOString(),
+      isRead: false,
+      timestamp: nowStr,
+      createdAt: nowStr,
       complaintId,
       ticketId,
     };
@@ -70,11 +73,12 @@ export function AppProvider({ children }) {
   };
 
   const markNotificationRead = (notifId) => {
-    setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
+    setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, read: true, isRead: true } : n));
   };
 
   const markAllNotificationsRead = (userId) => {
-    setNotifications(prev => prev.map(n => n.userId === userId ? { ...n, read: true } : n));
+    const targetUserId = userId || (currentUser ? currentUser.id : null);
+    setNotifications(prev => prev.map(n => (!targetUserId || n.userId === targetUserId) ? { ...n, read: true, isRead: true } : n));
   };
 
   const logAuditEvent = (action, details, targetType = 'General', targetId = null) => {

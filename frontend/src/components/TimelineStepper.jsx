@@ -12,40 +12,69 @@ export function TimelineStepper({ complaint, statusHistory = [], auditLogs = [] 
   const statusOrder = ['submitted', 'assigned', 'in_progress', 'completed'];
   const currentIndex = statusOrder.indexOf(complaint.status);
 
-  // Combine status history & audit logs matching this ticket
+  // Status history items
   const statusItems = (statusHistory || []).filter(h => h.complaintId === complaint.id || h.complaintId === complaint.ticketId);
+
+  // System audit items
   const auditItems = (auditLogs || [])
-    .filter(l => l.targetId === complaint.id || (l.details && (l.details.includes(complaint.ticketId) || l.details.includes(complaint.id))))
+    .filter(l => l.targetId === complaint.id || l.targetId === complaint.ticketId || (l.details && (l.details.includes(complaint.ticketId) || l.details.includes(complaint.id))))
     .map(l => ({
       id: l.id,
-      complaintId: complaint.id,
       notes: `${l.action.replace(/_/g, ' ')}: ${l.details}`,
       changedBy: `${l.userName} (${l.userRole})`,
       timestamp: l.timestamp,
     }));
 
-  const rawHistory = [...statusItems, ...auditItems];
-  if (rawHistory.length === 0) {
-    rawHistory.push({
-      id: `default-creation-${complaint.id}`,
-      complaintId: complaint.id,
-      notes: `Ticket #${complaint.ticketId} registered with ${complaint.priority.toUpperCase()} priority`,
+  // Synthetic milestone items ensuring complete timeline visibility
+  const syntheticItems = [
+    {
+      id: `syn-created-${complaint.id}`,
+      notes: `TICKET CREATED: Registered complaint #${complaint.ticketId} in category ${complaint.category} at ${complaint.location?.room || 'Location'}, ${complaint.location?.block || ''}`,
       changedBy: `${complaint.createdBy?.name || 'User'} (User)`,
       timestamp: complaint.createdAt || new Date().toISOString(),
-    });
-    if (complaint.assignedTo?.name) {
-      rawHistory.push({
-        id: `default-assignment-${complaint.id}`,
-        complaintId: complaint.id,
-        notes: `Workorder assigned to technician ${complaint.assignedTo.name}`,
-        changedBy: `System Dispatcher`,
-        timestamp: complaint.updatedAt || complaint.createdAt || new Date().toISOString(),
-      });
     }
+  ];
+
+  if (complaint.assignedTo?.name) {
+    syntheticItems.push({
+      id: `syn-assigned-${complaint.id}`,
+      notes: `AUTO ASSIGNED: Ticket assigned to technician ${complaint.assignedTo.name} (${complaint.assignedTo.department || 'Maintenance'})`,
+      changedBy: `Rule Engine Dispatcher`,
+      timestamp: complaint.createdAt || new Date().toISOString(),
+    });
   }
 
-  // Remove duplicates by ID and sort descending
-  const ticketHistory = Array.from(new Map(rawHistory.map(item => [item.id, item])).values())
+  if (complaint.status === 'in_progress' || complaint.status === 'completed') {
+    syntheticItems.push({
+      id: `syn-inprogress-${complaint.id}`,
+      notes: `WORK STARTED: Technician ${complaint.assignedTo?.name || 'Staff'} marked ticket In Progress`,
+      changedBy: `${complaint.assignedTo?.name || 'Staff'} (Technician)`,
+      timestamp: complaint.updatedAt || complaint.createdAt || new Date().toISOString(),
+    });
+  }
+
+  if (complaint.status === 'completed') {
+    syntheticItems.push({
+      id: `syn-completed-${complaint.id}`,
+      notes: `TICKET COMPLETED: Maintenance completed with After-Repair proof verification`,
+      changedBy: `${complaint.assignedTo?.name || 'Staff'} (Technician)`,
+      timestamp: complaint.resolvedAt || complaint.updatedAt || new Date().toISOString(),
+    });
+  }
+
+  if (complaint.rating) {
+    syntheticItems.push({
+      id: `syn-feedback-${complaint.id}`,
+      notes: `FEEDBACK SUBMITTED: User rated ${complaint.rating}/5 stars "${complaint.feedback || 'Good service'}"`,
+      changedBy: `${complaint.createdBy?.name || 'User'} (User)`,
+      timestamp: complaint.updatedAt || new Date().toISOString(),
+    });
+  }
+
+  const allLogs = [...syntheticItems, ...statusItems, ...auditItems];
+  
+  // Deduplicate by ID and sort descending by timestamp
+  const ticketHistory = Array.from(new Map(allLogs.map(item => [item.id, item])).values())
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
@@ -91,11 +120,11 @@ export function TimelineStepper({ complaint, statusHistory = [], auditLogs = [] 
         })}
       </div>
 
-      {/* Track Progress & Action Audit History */}
+      {/* Action Audit History */}
       <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
         <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-blue-600" />
-          Track Progress & Action Audit History
+          Action Audit History
         </h4>
 
         {ticketHistory.length === 0 ? (
