@@ -292,7 +292,9 @@ export function AppProvider({ children }) {
       assignedTo: assignedStaff ? {
         id: assignedStaff.id,
         name: assignedStaff.name,
-        department: assignedStaff.departmentName || 'Maintenance',
+        email: assignedStaff.email,
+        avatar: assignedStaff.avatar,
+        department: assignedStaff.departmentName || assignedStaff.department || 'Maintenance',
       } : null,
       attachments: formData.attachments || [],
       beforeImageUrl: null,

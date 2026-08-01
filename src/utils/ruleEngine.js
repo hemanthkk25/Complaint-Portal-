@@ -85,21 +85,35 @@ export function calculatePriority(categoryName, title, description, userUrgency)
  * and assigns to the staff member with the FEWEST open tickets.
  */
 export function findBestStaffAssignment(categoryObj, allStaffList, allComplaints) {
-  if (!categoryObj || !allStaffList || allStaffList.length === 0) return null;
+  if (!categoryObj || !allStaffList || !Array.isArray(allStaffList) || allStaffList.length === 0) return null;
 
-  // Filter staff by department
-  const deptStaff = allStaffList.filter(s => 
-    s.role === 'staff' && s.departmentId === categoryObj.departmentId
-  );
+  // Filter technicians/staff by department or category
+  const deptStaff = allStaffList.filter(s => {
+    if (s.isDeactivated) return false;
+    const isTechOrStaff = s.role === 'technician' || s.role === 'staff';
+    if (!isTechOrStaff) return false;
 
-  if (deptStaff.length === 0) {
-    // Fallback to any active staff if department match isn't available
-    return allStaffList.find(s => s.role === 'staff') || null;
-  }
+    const matchDeptId = Boolean(categoryObj.departmentId && s.departmentId === categoryObj.departmentId);
+    const catName = (categoryObj.name || '').toLowerCase();
+    const matchDeptName = Boolean(catName && (
+      (s.departmentName && s.departmentName.toLowerCase().includes(catName)) ||
+      (s.department && s.department.toLowerCase().includes(catName)) ||
+      (s.assignedCategory && s.assignedCategory.toLowerCase() === catName)
+    ));
 
-  // Count active tickets per staff member (Submitted, Assigned, In Progress)
-  const staffWorkloadMap = deptStaff.map(staff => {
-    const openTicketsCount = allComplaints.filter(c => 
+    return matchDeptId || matchDeptName;
+  });
+
+  // Use department staff if available, otherwise fallback to any active technician/staff
+  const candidates = deptStaff.length > 0
+    ? deptStaff
+    : allStaffList.filter(s => !s.isDeactivated && (s.role === 'technician' || s.role === 'staff'));
+
+  if (candidates.length === 0) return null;
+
+  // Count active open tickets per staff member (Submitted, Assigned, In Progress)
+  const staffWorkloadMap = candidates.map(staff => {
+    const openTicketsCount = (allComplaints || []).filter(c => 
       c.assignedTo?.id === staff.id && 
       ['submitted', 'assigned', 'in_progress'].includes(c.status)
     ).length;
@@ -113,7 +127,7 @@ export function findBestStaffAssignment(categoryObj, allStaffList, allComplaints
   // Sort by lowest open tickets count (workload balancing)
   staffWorkloadMap.sort((a, b) => a.openTicketsCount - b.openTicketsCount);
 
-  return staffWorkloadMap[0].staff;
+  return staffWorkloadMap[0]?.staff || null;
 }
 
 /**
