@@ -127,6 +127,8 @@ export async function createComplaint(req, res) {
         department: assignedStaff.departmentName || assignedStaff.department || 'Maintenance',
       } : null,
       attachments: attachments || [],
+      beforeImageUrl: (attachments && attachments.length > 0) ? attachments[0] : null,
+      afterImageUrl: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -158,7 +160,7 @@ export async function createComplaint(req, res) {
 export async function updateStatus(req, res) {
   try {
     const { id } = req.params;
-    const { newStatus, note, afterImageUrl, changedBy } = req.body;
+    const { newStatus, note, beforeImageUrl, afterImageUrl, changedBy } = req.body;
 
     let complaint = null;
     if (isDbConnected()) {
@@ -166,9 +168,10 @@ export async function updateStatus(req, res) {
       if (complaint) {
         complaint.status = newStatus;
         complaint.updatedAt = new Date();
+        if (beforeImageUrl) complaint.beforeImageUrl = beforeImageUrl;
+        if (afterImageUrl) complaint.afterImageUrl = afterImageUrl;
         if (newStatus === 'completed') {
           complaint.resolvedAt = new Date();
-          if (afterImageUrl) complaint.afterImageUrl = afterImageUrl;
         }
         await complaint.save();
       }
@@ -177,9 +180,10 @@ export async function updateStatus(req, res) {
       if (complaint) {
         complaint.status = newStatus;
         complaint.updatedAt = new Date();
+        if (beforeImageUrl) complaint.beforeImageUrl = beforeImageUrl;
+        if (afterImageUrl) complaint.afterImageUrl = afterImageUrl;
         if (newStatus === 'completed') {
           complaint.resolvedAt = new Date();
-          if (afterImageUrl) complaint.afterImageUrl = afterImageUrl;
         }
       }
     }

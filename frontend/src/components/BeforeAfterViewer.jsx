@@ -21,7 +21,7 @@ export function BeforeAfterViewer({ beforeImageUrl, afterImageUrl }) {
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
           <ArrowRightLeft className="w-3.5 h-3.5 text-blue-600" />
-          Module 8: Before & After Repair Proof
+          Before & After Repair Proof
         </h4>
 
         <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">

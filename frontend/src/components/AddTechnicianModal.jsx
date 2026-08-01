@@ -20,7 +20,7 @@ export function AddTechnicianModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    if (!name.trim() || !email.trim() || !phone.trim()) return;
 
     const deptObj = departments.find(d => d.id === departmentId);
     const targetCategoryName = isSupervisor ? supervisorCategory : selectedAssignedCategory;
@@ -101,9 +101,10 @@ export function AddTechnicianModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact</label>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Contact *</label>
             <input
               type="text"
+              required
               placeholder="+91 98000 88888"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

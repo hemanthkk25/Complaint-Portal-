@@ -130,10 +130,23 @@ export function AppProvider({ children }) {
     return null;
   };
 
-  const updateComplaintStatus = async (complaintId, newStatus, note = '', afterImageUrl = null) => {
+  const updateComplaintStatus = async (complaintId, newStatus, payload = {}) => {
+    let note = '';
+    let beforeImageUrl = null;
+    let afterImageUrl = null;
+
+    if (typeof payload === 'string') {
+      note = payload;
+    } else if (typeof payload === 'object' && payload !== null) {
+      note = payload.notes || payload.note || '';
+      beforeImageUrl = payload.beforeImageUrl || null;
+      afterImageUrl = payload.afterImageUrl || null;
+    }
+
     const res = await api.updateStatus(complaintId, {
       newStatus,
       note,
+      beforeImageUrl,
       afterImageUrl,
       changedBy: currentUser ? `${currentUser.name} (${currentUser.role})` : 'Staff'
     });
