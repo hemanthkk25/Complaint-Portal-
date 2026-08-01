@@ -27,9 +27,10 @@ export function CreateComplaintModal({ isOpen, onClose }) {
     setSelectedIssuePreset(preset);
     if (preset && preset !== 'custom') {
       setTitle(preset);
-      if (!description || description.startsWith('Standardized maintenance request')) {
-        setDescription(`Standardized maintenance request for ${preset} at ${room}, ${block}.`);
-      }
+      setDescription(`Standardized maintenance request for ${preset} at ${room}, ${block}.`);
+    } else if (preset === 'custom') {
+      setTitle('');
+      setDescription('');
     }
   };
 
@@ -152,6 +153,8 @@ export function CreateComplaintModal({ isOpen, onClose }) {
                 onChange={(e) => {
                   setCategory(e.target.value);
                   setSelectedIssuePreset('');
+                  setTitle('');
+                  setDescription('');
                 }}
                 className="w-full px-4 py-2.5 rounded-xl light-input text-xs font-bold text-slate-900"
               >

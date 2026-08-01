@@ -162,19 +162,39 @@ export function detectDuplicates(newComplaint, existingComplaints, maxHours = 16
     const isLocationExact = sameBlock && sameFloor && sameRoom;
     const isLocationPartial = sameBlock && sameFloor;
 
-    // 5. Token-based Text Similarity (Jaccard Similarity)
-    const getTokens = (str) => {
+    // 5. Token-based Text Similarity (Jaccard Similarity on actual issue terms)
+    const GENERIC_STOP_WORDS = new Set([
+      'in', 'at', 'on', 'to', 'is', 'it', 'my', 'by', 'or', 'an', 'be', 'do', 'if', 'me', 'no', 'of', 'so', 'we',
+      'the', 'and', 'for', 'with', 'this', 'that', 'from', 'as', 'are', 'was', 'were', 'been', 'has', 'have', 'had',
+      'standardized', 'maintenance', 'request', 'complaint', 'issue', 'problem', 'ticket', 'reported', 'reporting',
+      'please', 'urgent', 'attention', 'required', 'location', 'block', 'floor', 'room', 'lab', 'building', 'wing',
+      'academic', 'hall', 'storage', 'department', 'ground', '1st', '2nd', '3rd', '4th', '5th', 'st', 'nd', 'rd', 'th'
+    ]);
+
+    // Extract dynamic location words from both tickets to ensure room/block names don't artificially inflate issue similarity
+    const getLocationTokens = (loc) => {
+      if (!loc) return new Set();
+      const str = `${loc.block || ''} ${loc.floor || ''} ${loc.room || ''}`.toLowerCase();
+      return new Set(str.replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean));
+    };
+
+    const locTokens = new Set([
+      ...getLocationTokens(newComplaint.location),
+      ...getLocationTokens(existing.location),
+    ]);
+
+    const getIssueTokens = (str) => {
       if (!str) return new Set();
       return new Set(
         str.toLowerCase()
           .replace(/[^a-z0-9\s]/g, '')
           .split(/\s+/)
-          .filter(w => w.length > 2)
+          .filter(w => w.length > 1 && !GENERIC_STOP_WORDS.has(w) && !locTokens.has(w))
       );
     };
 
-    const newTokens = getTokens(`${newComplaint.title || ''} ${newComplaint.description || ''}`);
-    const exTokens = getTokens(`${existing.title || ''} ${existing.description || ''}`);
+    const newTokens = getIssueTokens(`${newComplaint.title || ''} ${newComplaint.description || ''}`);
+    const exTokens = getIssueTokens(`${existing.title || ''} ${existing.description || ''}`);
 
     let jaccardSim = 0;
     if (newTokens.size > 0 && exTokens.size > 0) {
@@ -183,16 +203,16 @@ export function detectDuplicates(newComplaint, existingComplaints, maxHours = 16
       jaccardSim = union > 0 ? intersection / union : 0;
     }
 
-    // Substring fallback check
-    const newTitle = (newComplaint.title || '').toLowerCase().trim();
-    const exTitle = (existing.title || '').toLowerCase().trim();
-    const substringMatch = newTitle.length >= 4 && exTitle.length >= 4 && (
-      newTitle.includes(exTitle) || exTitle.includes(newTitle)
+    // Substring fallback check (compare clean title issue tokens)
+    const cleanNewTitle = [...getIssueTokens(newComplaint.title)].join(' ');
+    const cleanExTitle = [...getIssueTokens(existing.title)].join(' ');
+    const substringMatch = cleanNewTitle.length >= 4 && cleanExTitle.length >= 4 && (
+      cleanNewTitle.includes(cleanExTitle) || cleanExTitle.includes(cleanNewTitle)
     );
 
     // Matching Criteria:
-    // A. Same category & Exact Location
-    if (sameCategory && isLocationExact) {
+    // A. Same category & Exact Location (requires issue text similarity so different issues in the same room aren't flagged)
+    if (sameCategory && isLocationExact && (jaccardSim >= 0.15 || substringMatch)) {
       return true;
     }
 
