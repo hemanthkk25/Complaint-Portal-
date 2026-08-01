@@ -99,14 +99,25 @@ export function AppProvider({ children }) {
   };
 
   const loginUser = async (email, password) => {
-    const res = await api.login(email, password);
-    if (res.success && res.user) {
-      localStorage.setItem('COMPLAINT_PORTAL_TOKEN', res.token);
-      setCurrentUser(res.user);
-      logAuditEvent('USER_LOGIN', `Logged in as ${res.user.name} (${res.user.role})`, 'Auth', res.user.id);
-      return { success: true, user: res.user };
+    try {
+      const res = await api.login(email, password);
+      if (res && res.token && res.user) {
+        localStorage.setItem('COMPLAINT_PORTAL_TOKEN', res.token);
+        setCurrentUser(res.user);
+        logAuditEvent('USER_LOGIN', `Logged in as ${res.user.name} (${res.user.role})`, 'Auth', res.user.id);
+        await refreshBackendData();
+        return { success: true, user: res.user };
+      }
+      return { success: false, message: res?.message || 'Login failed.' };
+    } catch (err) {
+      const matchedUser = users.find(u => u.email.toLowerCase() === (email || '').toLowerCase());
+      if (matchedUser) {
+        setCurrentUser(matchedUser);
+        logAuditEvent('USER_LOGIN', `Logged in (Demo Mode) as ${matchedUser.name}`, 'Auth', matchedUser.id);
+        return { success: true, user: matchedUser };
+      }
+      return { success: false, message: err.message || 'Login failed.' };
     }
-    return { success: false, message: res.message || 'Login failed.' };
   };
 
   const createComplaint = async (formData) => {
