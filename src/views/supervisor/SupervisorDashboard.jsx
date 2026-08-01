@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { StatusBadge } from '../components/StatusBadge';
-import { PriorityBadge } from '../components/PriorityBadge';
-import { AddTechnicianModal } from '../components/AddTechnicianModal';
-import { exportToCSV, printPDFReport } from '../utils/exportUtils';
+import { useApp } from '../../context/AppContext';
+import { StatusBadge } from '../../components/StatusBadge';
+import { PriorityBadge } from '../../components/PriorityBadge';
+import { AddTechnicianModal } from '../../components/AddTechnicianModal';
+import { exportToCSV, printPDFReport } from '../../utils/exportUtils';
 import {
   Wrench, Users, Clock, AlertTriangle, CheckCircle2, Ticket,
   UserCheck, ArrowRightLeft, Download, Printer, Filter, ShieldAlert,
@@ -68,32 +68,6 @@ export function SupervisorDashboard({ onSelectComplaint, searchQuery }) {
 
   const handleQuickAssign = (complaintId, staffId) => {
     reassignStaffManually(complaintId, staffId);
-  };
-
-  const handleAddTechSubmit = (e) => {
-    e.preventDefault();
-    if (!techName || !techEmail) return;
-
-    addUserByAdmin({
-      name: techName,
-      email: techEmail,
-      role: 'technician',
-      departmentId: selectedDeptId,
-      departmentName: 'Electrical & Maintenance',
-      phone: techPhone || '+91 98000 12345',
-    });
-
-    setIsAddTechModalOpen(false);
-    setTechName('');
-    setTechEmail('');
-    setTechPhone('');
-  };
-
-  const handleAddPresetSubmit = (e) => {
-    e.preventDefault();
-    if (!newPresetText.trim()) return;
-    addPredefinedIssue(supervisorCategory, newPresetText.trim());
-    setNewPresetText('');
   };
 
   const handleExportCSV = () => {
@@ -226,8 +200,6 @@ export function SupervisorDashboard({ onSelectComplaint, searchQuery }) {
           })}
         </div>
       </div>
-
-
 
       {/* Complaint Filters & Dispatch Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">

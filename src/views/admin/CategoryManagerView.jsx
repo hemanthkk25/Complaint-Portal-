@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import { FolderPlus, Shield, PlusCircle, CheckCircle2, UserCheck } from 'lucide-react';
 
 export function CategoryManagerView() {

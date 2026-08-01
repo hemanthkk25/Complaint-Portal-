@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import { Settings, Plus, Trash2, FolderPlus, Layers } from 'lucide-react';
 
 export function SuperAdminConfigView() {

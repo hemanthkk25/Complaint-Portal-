@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { StatusBadge } from '../components/StatusBadge';
-import { PriorityBadge } from '../components/PriorityBadge';
+import { useApp } from '../../context/AppContext';
+import { StatusBadge } from '../../components/StatusBadge';
+import { PriorityBadge } from '../../components/PriorityBadge';
 import { Wrench, CheckCircle2, Star, Clock, MapPin, ArrowRight } from 'lucide-react';
 
-export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
+export function StaffDashboard({ onSelectComplaint, searchQuery }) {
   const { currentUser, complaints } = useApp();
 
   const [activeTab, setActiveTab] = useState('assigned'); // 'assigned' | 'in_progress' | 'completed'
 
-  let technicianComplaints = complaints.filter(c => c.assignedTo?.id === currentUser.id);
+  let staffComplaints = complaints.filter(c => c.assignedTo?.id === currentUser.id);
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    technicianComplaints = technicianComplaints.filter(c =>
+    staffComplaints = staffComplaints.filter(c =>
       c.ticketId.toLowerCase().includes(q) ||
       c.title.toLowerCase().includes(q) ||
       c.location?.room?.toLowerCase().includes(q)
     );
   }
 
-  const assignedList = technicianComplaints.filter(c => c.status === 'assigned');
-  const inProgressList = technicianComplaints.filter(c => c.status === 'in_progress');
-  const completedList = technicianComplaints.filter(c => c.status === 'completed');
+  const assignedList = staffComplaints.filter(c => c.status === 'assigned');
+  const inProgressList = staffComplaints.filter(c => c.status === 'in_progress');
+  const completedList = staffComplaints.filter(c => c.status === 'completed');
 
   const ratedComplaints = completedList.filter(c => c.rating);
   const avgRating = ratedComplaints.length > 0
@@ -35,7 +35,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
 
   return (
     <div className="space-y-6">
-      {/* Technician Profile Banner */}
+      {/* Staff Profile Banner */}
       <div className="clean-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
         <div className="flex items-center gap-4">
           <img
@@ -47,7 +47,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-slate-900">{currentUser.name}</h2>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                Field Technician
+                Staff Technician
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -62,7 +62,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
             <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
           </div>
           <div>
-            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider font-mono">Rating Score</div>
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Rating Score</div>
             <div className="text-lg font-bold text-slate-900">{avgRating} / 5.0 ⭐</div>
             <div className="text-[10px] text-slate-500">{ratedComplaints.length} reviews</div>
           </div>
@@ -80,7 +80,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
           }`}
         >
           <Clock className="w-4 h-4 text-amber-600" />
-          Assigned Work Orders ({assignedList.length})
+          Assigned Queue ({assignedList.length})
         </button>
 
         <button
@@ -113,7 +113,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
         <div className="clean-card p-12 text-center">
           <Wrench className="w-10 h-10 mx-auto text-slate-300 mb-2" />
           <h3 className="text-sm font-semibold text-slate-800">No work orders in this queue</h3>
-          <p className="text-xs text-slate-500 mt-1">You have no technician tasks currently under '{activeTab.replace('_', ' ')}'.</p>
+          <p className="text-xs text-slate-500 mt-1">You have no tickets currently under '{activeTab.replace('_', ' ')}'.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -151,7 +151,7 @@ export function TechnicianDashboard({ onSelectComplaint, searchQuery }) {
                     <span>{complaint.location.block} • <strong>{complaint.location.room}</strong></span>
                   </div>
                   <div className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700">
-                    Task Execution <ArrowRight className="w-3.5 h-3.5" />
+                    Task Actions <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
               </div>

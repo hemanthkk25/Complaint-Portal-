@@ -7,16 +7,16 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { CreateComplaintModal } from './components/CreateComplaintModal';
 import { ComplaintDetailModal } from './components/ComplaintDetailModal';
 
-import { LoginView } from './views/LoginView';
-import { UserDashboard } from './views/UserDashboard';
-import { TechnicianDashboard } from './views/TechnicianDashboard';
-import { SupervisorDashboard } from './views/SupervisorDashboard';
-import { AdminDashboard } from './views/AdminDashboard';
-import { AnalyticsView } from './views/AnalyticsView';
-import { UserManagementView } from './views/UserManagementView';
-import { AuditLogsView } from './views/AuditLogsView';
-import { IssuePresetsView } from './views/IssuePresetsView';
-import { CategoryManagerView } from './views/CategoryManagerView';
+import { LoginView } from './views/auth/LoginView';
+import { UserDashboard } from './views/user/UserDashboard';
+import { TechnicianDashboard } from './views/technician/TechnicianDashboard';
+import { SupervisorDashboard } from './views/supervisor/SupervisorDashboard';
+import { AdminDashboard } from './views/admin/AdminDashboard';
+import { AnalyticsView } from './views/admin/AnalyticsView';
+import { UserManagementView } from './views/admin/UserManagementView';
+import { AuditLogsView } from './views/admin/AuditLogsView';
+import { IssuePresetsView } from './views/admin/IssuePresetsView';
+import { CategoryManagerView } from './views/admin/CategoryManagerView';
 
 function MainApp() {
   const { currentUser } = useApp();

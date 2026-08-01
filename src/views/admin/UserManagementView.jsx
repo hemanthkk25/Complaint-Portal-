@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { AddTechnicianModal } from '../components/AddTechnicianModal';
+import { useApp } from '../../context/AppContext';
+import { AddTechnicianModal } from '../../components/AddTechnicianModal';
 import { Users, UserPlus, Lock, Unlock, Search } from 'lucide-react';
 
 export function UserManagementView() {
@@ -36,28 +36,6 @@ export function UserManagementView() {
   if (roleFilter !== 'all') {
     filteredUsers = filteredUsers.filter(u => u.role === roleFilter);
   }
-
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    if (!name || !email) return;
-
-    const deptObj = departments.find(d => d.id === departmentId);
-    const supervisorDeptObj = categories.find(c => c.name.toLowerCase() === supervisorCategory?.toLowerCase());
-
-    addUserByAdmin({
-      name,
-      email,
-      role: isSupervisor ? 'technician' : role,
-      departmentId: isSupervisor ? (supervisorDeptObj?.departmentId || 'dept-1') : departmentId,
-      departmentName: isSupervisor ? `${supervisorCategory} Department` : (deptObj?.name || 'General'),
-      phone: phone || '+91 98000 00000',
-    });
-
-    setIsAddModalOpen(false);
-    setName('');
-    setEmail('');
-    setPhone('');
-  };
 
   return (
     <div className="space-y-6">

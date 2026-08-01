@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { StatusBadge } from '../components/StatusBadge';
-import { PriorityBadge } from '../components/PriorityBadge';
+import { useApp } from '../../context/AppContext';
+import { StatusBadge } from '../../components/StatusBadge';
+import { PriorityBadge } from '../../components/PriorityBadge';
 import { Ticket, PlusCircle, Clock, CheckCircle2, AlertOctagon, Filter, ArrowRight, MapPin, Sparkles, Search } from 'lucide-react';
 
 export function UserDashboard({ onOpenCreateModal, onSelectComplaint, searchQuery }) {
