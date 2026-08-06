@@ -13,6 +13,7 @@ export function Sidebar({ onOpenCreateModal, onLogout, isOpenMobile, onCloseMobi
   if (!currentUser) return null;
 
   const role = currentUser.role;
+  if (role === 'user' || role === 'technician') return null;
   const supervisorCategory = currentUser.assignedCategory || 'Electrical';
 
   const technicianQueueCount = complaints.filter(c => c.assignedTo?.id === currentUser.id && c.status !== 'completed').length;

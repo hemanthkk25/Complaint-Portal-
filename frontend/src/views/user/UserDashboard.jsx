@@ -10,7 +10,16 @@ export function UserDashboard({ onOpenCreateModal, onSelectComplaint, searchQuer
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
 
-  let userComplaints = complaints.filter(c => c.createdBy?.id === currentUser.id);
+  const allUserComplaints = complaints.filter(c => c.createdBy?.id === currentUser.id);
+
+  // Overall metric counts (independent of table filters)
+  const totalCount = allUserComplaints.length;
+  const pendingCount = allUserComplaints.filter(c => c.status !== 'completed').length;
+  const completedCount = allUserComplaints.filter(c => c.status === 'completed').length;
+  const highPriorityCount = allUserComplaints.filter(c => c.priority === 'high').length;
+
+  // Filtered list specifically for display
+  let userComplaints = [...allUserComplaints];
 
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
@@ -29,11 +38,6 @@ export function UserDashboard({ onOpenCreateModal, onSelectComplaint, searchQuer
   if (priorityFilter !== 'all') {
     userComplaints = userComplaints.filter(c => c.priority === priorityFilter);
   }
-
-  const totalCount = userComplaints.length;
-  const pendingCount = userComplaints.filter(c => c.status !== 'completed').length;
-  const completedCount = userComplaints.filter(c => c.status === 'completed').length;
-  const highPriorityCount = userComplaints.filter(c => c.priority === 'high').length;
 
   return (
     <div className="space-y-6">

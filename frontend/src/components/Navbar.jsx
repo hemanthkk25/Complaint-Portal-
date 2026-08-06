@@ -41,18 +41,22 @@ export function Navbar({ searchQuery, setSearchQuery, onLogout, onToggleMobileMe
 
   const roleInfo = getRoleBadge(currentUser.role);
 
+  const hasSidebar = currentUser?.role === 'admin' || currentUser?.role === 'supervisor';
+
   return (
     <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left Side: Mobile Menu Button & Brand Logo */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={onToggleMobileMenu}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center md:hidden transition"
-            title="Toggle Menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          {hasSidebar && (
+            <button
+              onClick={onToggleMobileMenu}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center md:hidden transition"
+              title="Toggle Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
 
           <Link to={getRoleHome(currentUser.role)} className="flex items-center gap-3 hover:opacity-90 transition">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-4 ring-blue-50">
